@@ -10,7 +10,7 @@
 
 ## 0. Change Log
 
-None.
+- Tue 7 Jun 10pm: Fix note about direction of device creation position, and specify Moving Devices move anticlockwise
 
 ## 1. Aims
 
@@ -357,7 +357,7 @@ All methods below exist in the class `src/unsw/blackout/BlackoutController.java`
 
 ### Task 1 a) Create Device
 
-Adds a device to the ring at the position specified, the position is measured as an angle relative to the x-axis, rotating clockwise.
+Adds a device to the ring at the position specified, the position is measured as an angle relative to the x-axis, rotating anticlockwise.
 
 ```java
 public void createDevice(String deviceId, String type, Angle position);
@@ -604,7 +604,7 @@ This task introduces a new subset of device which moves on a path of its own as 
 - Desktop - 20km per minute
 - Laptop - 30km per minute
 
-Moving Devices move at a constant rate along the surface of Jupiter. However, though in this problem Jupiter is still 2D, it is no longer completely spherical. A **slope** can be created between any two positions on Jupiter, which signifies a change in altitude of the Jupiter's surface. All slopes have a gradient `μ`, which is the change in height **for every degree** between the start and end of the slope.
+Moving Devices move at a constant rate along the surface of Jupiter in an anticlockwise direction. However, though in this problem Jupiter is still 2D, it is no longer completely spherical. A **slope** can be created between any two positions on Jupiter, which signifies a change in altitude of the Jupiter's surface. All slopes have a gradient `μ`, which is the change in height **for every degree** between the start and end of the slope.
 
 In the diagram below, two slopes have been created - one which goes from `θ = 0` to `θ = 20` with a gradient of `700`, and one which goes from `θ = 20` to `θ = 50` with a gradient of `-520`.
 

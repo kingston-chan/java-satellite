@@ -11,6 +11,7 @@
 ## 0. Change Log
 
 - Tue 7 Jun 10pm: Fix note about direction of device creation position, and specify Moving Devices move anticlockwise
+- Thu 9 Jun 11am: Clarify teleporting satellite teleport mid-transfer rules + stacking slopes for first case
 
 ## 1. Aims
 
@@ -147,8 +148,8 @@ Default direction for all satellites is negative (clockwise), unless otherwise s
   - Can receive 15 bytes per minute and can send 10 bytes per minute.
   - Can store up to 200 bytes and as many files as fits into that space.
   - When the position of the satellite reaches θ = 180, the satellite teleports to θ = 0 and changes direction.
-  - If a file transfer is in progress when the satellite teleports, the rest of the file is instantly
-    downloaded, however all `"t"` bytes are removed from the remaining bytes to be sent
+  - If a file transfer **from a satellite to a device** is in progress when the satellite teleports, the rest of the file is instantly downloaded, however all `"t"` bytes are removed from the remaining bytes to be sent.
+  - If a file transfer **from a device to a satellite** is in progress when the satellite teleports, the download fails and the partially uploaded file is removed from the satellite, *and* all `"t"` bytes are removed from the file on the device.
   - Teleporting satellites start by moving anticlockwise.
 - `RelaySatellite`
   - Moves at a linear velocity of 1,500 kilometres (1,500,000 metres) per minute
@@ -636,7 +637,7 @@ Note that because of the way the frontend renders slopes, you will be able to se
 
 It is possible for slopes to be created at overlapping positions. If a slope `A` is created at angle `(X, Y)`, where `X` is the starting position and `Y` is the end of the slope, and slope `B` is created at angle `(I, J)` similarly, and `I` is between `X` and `Y`:
 
-- If slope `A` is increasing and `B` is increasing, then Slope `B` becomes the actual surface of the Jupiter, starting from `I` at `A`'s current height, and continuing until it finishes, _if_ the gradient of Slope `B` is greater than the gradient of Slope `A`.
+- If slope `A` is increasing and `B` is increasing, then Slope `B` becomes the actual surface of the Jupiter, starting from `I` at `A`'s current height, and continuing until it finishes, _if_ the gradient of Slope `B` is greater than the gradient of Slope `A`. Otherwise, `B` will become the actual surface of Jupiter from `Y` to `J`, though the mathematical start of slope `B` is still `I`.
 - If slope `A` is increasing and `B` is decreasing, then `A` remains the actual surface of the Jupiter until `Y`. If `J` > `Y`, then `B` becomes the new surface from `J` to `Y`.
 - If slope `A` is decreasing and `B` is increasing, then Slope `B` becomes the actual surface of the Jupiter, starting at `A`'s current height.
 - If slope `A` is decreasing and `B` is also decreasing, then Slope `B` becomes the actual surface of the Jupiter if the absolute values of `B`'s gradient is less than the absolute value of `A`'s gradient.

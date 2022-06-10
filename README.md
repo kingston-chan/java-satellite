@@ -12,6 +12,11 @@
 
 - Tue 7 Jun 10pm: Fix note about direction of device creation position, and specify Moving Devices move anticlockwise
 - Thu 9 Jun 11am: Clarify teleporting satellite teleport mid-transfer rules + stacking slopes for first case
+- Fri 10 Jun 5pm:
+  - Clarify correction on teleporting satellite
+  - Clarify satellite to satellite teleport mid-transfer rules
+  - Update stale comment in Task 2 Example `testRelayMovement`
+  - Fix rounding issue in Task 2 Example `testRelayMovement`
 
 ## 1. Aims
 
@@ -148,8 +153,9 @@ Default direction for all satellites is negative (clockwise), unless otherwise s
   - Can receive 15 bytes per minute and can send 10 bytes per minute.
   - Can store up to 200 bytes and as many files as fits into that space.
   - When the position of the satellite reaches θ = 180, the satellite teleports to θ = 0 and changes direction.
-  - If a file transfer **from a satellite to a device** is in progress when the satellite teleports, the rest of the file is instantly downloaded, however all `"t"` bytes are removed from the remaining bytes to be sent.
+  - If a file transfer **from a satellite to a device or a satellite to another satellite** is in progress when the satellite teleports, the rest of the file is instantly downloaded, however all `"t"` bytes are removed from the remaining bytes to be sent.
   - If a file transfer **from a device to a satellite** is in progress when the satellite teleports, the download fails and the partially uploaded file is removed from the satellite, *and* all `"t"` bytes are removed from the file on the device.
+  - There is no 'correction' with the position after a teleport occurs as there is for Relay Satellites (see below). Once the satellite teleports to θ = 0 it does not continue moving for the remainder of the tick.
   - Teleporting satellites start by moving anticlockwise.
 - `RelaySatellite`
   - Moves at a linear velocity of 1,500 kilometres (1,500,000 metres) per minute

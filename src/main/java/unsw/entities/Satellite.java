@@ -9,9 +9,13 @@ public class Satellite extends Communicator {
     private boolean clockwiseDirection;
     private double height;
     private String type;
+    private int maxFiles;
+    private int availFileStorage; // in bytes
+    private int downloadCount;
+    private int uploadCount;
 
     public Satellite(String id, int maxRange, Angle position, int linearSpeed, int uploadSpeed, int downloadSpeed,
-            boolean clockwiseDirection, double height, String type) {
+            boolean clockwiseDirection, double height, String type, int maxFiles, int availFileStorage) {
         super(id, maxRange, position);
         this.linearSpeed = linearSpeed;
         this.uploadSpeed = uploadSpeed;
@@ -19,6 +23,10 @@ public class Satellite extends Communicator {
         this.clockwiseDirection = clockwiseDirection;
         this.height = height;
         this.type = type;
+        this.maxFiles = maxFiles;
+        this.availFileStorage = availFileStorage;
+        this.downloadCount = 0;
+        this.uploadCount = 0;
     }
 
     public int getLinearSpeed() {
@@ -71,5 +79,41 @@ public class Satellite extends Communicator {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public int getMaxFiles() {
+        return maxFiles;
+    }
+
+    public void setMaxFiles(int maxFiles) {
+        this.maxFiles = maxFiles;
+    }
+
+    public int getAvailFileStorage() {
+        return availFileStorage;
+    }
+
+    public void setAvailFileStorage(int availFileStorage) {
+        this.availFileStorage = availFileStorage;
+    }
+
+    public int getUploadCount() {
+        return uploadCount;
+    }
+
+    public void setUploadCount(int uploadCount) {
+        this.uploadCount = uploadCount;
+    }
+
+    public int getDownloadCount() {
+        return downloadCount;
+    }
+
+    public void setDownloadCount(int downloadCount) {
+        this.downloadCount = downloadCount;
+    }
+
+    public boolean supports(Device device) {
+        return true;
     }
 }

@@ -54,5 +54,4 @@ public class Communicator {
     public void addFile(FileInfoResponse file) {
         this.files.add(file);
     }
-
 }

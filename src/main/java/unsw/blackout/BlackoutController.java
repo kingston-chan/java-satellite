@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import unsw.response.models.EntityInfoResponse;
 import unsw.response.models.FileInfoResponse;
@@ -32,12 +33,101 @@ public class BlackoutController {
         this.activeCommunicators = new HashMap<String, Communicator>();
     }
 
+    private Device toDevice(Communicator communicator) {
+        return (Device) communicator;
+    }
+
+    private Satellite toSatellite(Communicator communicator) {
+        return (Satellite) communicator;
+    }
+
+    private boolean isReachableWithRelays(String start, String dest) {
+        HashMap<String, Integer> visited = new HashMap<String, Integer>();
+
+        for (String comm : this.activeCommunicators.keySet()) {
+            visited.put(comm, -1);
+        }
+
+        Stack<String> stack = new Stack<String>();
+
+        stack.push(start);
+
+        while (!stack.empty()) {
+            String currCommStr = stack.pop();
+
+            if (visited.get(currCommStr) == -1) {
+
+                visited.replace(currCommStr, 0);
+
+                Communicator currComm = this.activeCommunicators.get(currCommStr);
+
+                for (String nodeCommStr : this.activeCommunicators.keySet()) {
+                    Communicator nodeComm = this.activeCommunicators.get(nodeCommStr);
+
+                    if (nodeComm instanceof Satellite && currComm instanceof Device) {
+                        if (MathsHelper.isVisible(
+                                this.toSatellite(nodeComm).getHeight(),
+                                this.toSatellite(nodeComm).getPosition(),
+                                this.toDevice(currComm).getPosition())) {
+                            if (nodeCommStr == dest) {
+                                return true;
+                            }
+
+                            if (nodeComm instanceof RelaySatellite && visited.get(nodeCommStr) == -1) {
+                                stack.push(nodeCommStr);
+                            }
+                        }
+                    }
+
+                    if (nodeComm instanceof Satellite && currComm instanceof Satellite) {
+                        if (MathsHelper.isVisible(
+                                this.toSatellite(nodeComm).getHeight(),
+                                this.toSatellite(nodeComm).getPosition(),
+                                this.toSatellite(currComm).getHeight(),
+                                this.toSatellite(currComm).getPosition())) {
+                            if (nodeCommStr == dest) {
+                                return true;
+                            }
+
+                            if (nodeComm instanceof RelaySatellite && visited.get(nodeCommStr) == -1) {
+                                stack.push(nodeCommStr);
+                            }
+                        }
+                    }
+
+                    if (nodeComm instanceof Device && currComm instanceof Satellite) {
+                        if (MathsHelper.isVisible(
+                                this.toSatellite(currComm).getHeight(),
+                                this.toSatellite(currComm).getPosition(),
+                                this.toDevice(nodeComm).getPosition())) {
+                            if (nodeCommStr == dest) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        return false;
+    }
+
+    private boolean isCommunicable(Satellite satellite1, Satellite satellite2) {
+        boolean inRange = MathsHelper.isVisible(satellite1.getHeight(), satellite1.getPosition(),
+                satellite2.getHeight(), satellite2.getPosition());
+
+        // Need another check using relay satellites
+        return inRange || isReachableWithRelays(satellite1.getId(), satellite2.getId());
+    }
+
     private boolean isCommunicable(Device device, Satellite satellite) {
         boolean inRange = MathsHelper.isVisible(satellite.getHeight(), satellite.getPosition(),
                 device.getPosition());
         boolean isSupported = satellite.supports(device);
 
-        return inRange && isSupported;
+        // Need another check using relay satellites
+        return (inRange && isSupported) || isReachableWithRelays(device.getId(), satellite.getId());
     }
 
     private void sendFileToTargetSatellite(Satellite targetSat, FileInfoResponse file) throws FileTransferException {
@@ -197,8 +287,7 @@ public class BlackoutController {
                     Satellite otherSat = (Satellite) c.getValue();
 
                     if (otherSat != satellite) {
-                        if (MathsHelper.isVisible(satellite.getHeight(), satellite.getPosition(), otherSat.getHeight(),
-                                otherSat.getPosition())) {
+                        if (isCommunicable(satellite, otherSat)) {
                             communicables.add(otherSat.getId());
                         }
                     }

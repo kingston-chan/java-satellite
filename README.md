@@ -18,6 +18,7 @@
   - Update stale comment in Task 2 Example `testRelayMovement`
   - Fix rounding issue in Task 2 Example `testRelayMovement`
 - Sun 12 Jun 9am: Fix further stale comments on satellite direction in spec and simple example
+- Mon 13 Jun 9pm: Reword comment about files with the same id + clarify teleporting satellite transfer with satellite->satellite
 
 ## 1. Aims
 
@@ -127,7 +128,7 @@ There are three types of devices available. Each device has a maximum range from
 
 Devices can store an infinite number of files and can upload/download files from satellites. Files are represented simply by just a string representing their content and a filename representing their name.
 
-All files can be presumed to purely consist of alphanumeric characters or spaces (i.e. a-z, A-Z, 0-9, or spaces) and filenames can be presumed to be unique (i.e. if two files have the same filename they will have the same content). Furthermore, since we are dealing with such a simple subset, 1 character is equivalent to 1 byte. We will often refer to the size of files in terms of bytes, and the file size only relates to the content of the file (and not the filename).
+All files can be presumed to purely consist of alphanumeric characters or spaces (i.e. a-z, A-Z, 0-9, or spaces) and filenames can be presumed to be unique (i.e. we will never create two files of the same name with different content). Furthermore, since we are dealing with such a simple subset, 1 character is equivalent to 1 byte. We will often refer to the size of files in terms of bytes, and the file size only relates to the content of the file (and not the filename).
 
 To send files the target needs to be within the range of the source BUT the source does not have to be within the range of the target. For example if a `HandheldDevice` (range `50,000 km`) is `100,000 km` away from a `StandardSatellite` (range `150,000 km`) it can't send files to the satellite but it can receive files from the satellite. If the device is `160,000 km` away from the satellite neither can interact with each other. Satellites can also send files to other satellites but devices can not send files to other devices.
 
@@ -155,6 +156,7 @@ Default direction for all satellites is negative (clockwise), unless otherwise s
   - Can store up to 200 bytes and as many files as fits into that space.
   - When the position of the satellite reaches θ = 180, the satellite teleports to θ = 0 and changes direction.
   - If a file transfer **from a satellite to a device or a satellite to another satellite** is in progress when the satellite teleports, the rest of the file is instantly downloaded, however all `"t"` bytes are removed from the remaining bytes to be sent.
+    - For the satellite to satellite case, the behaviour is the same whether it is the sender or receiving that is teleporting
   - If a file transfer **from a device to a satellite** is in progress when the satellite teleports, the download fails and the partially uploaded file is removed from the satellite, *and* all `"t"` bytes are removed from the file on the device.
   - There is no 'correction' with the position after a teleport occurs as there is for Relay Satellites (see below). Once the satellite teleports to θ = 0 it does not continue moving for the remainder of the tick.
   - Teleporting satellites start by moving anticlockwise.

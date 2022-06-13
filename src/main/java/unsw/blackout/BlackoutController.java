@@ -1,6 +1,5 @@
 package unsw.blackout;
 
-import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

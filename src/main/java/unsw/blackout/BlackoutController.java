@@ -41,6 +41,19 @@ public class BlackoutController {
         return (Satellite) communicator;
     }
 
+    private boolean isVisible(Device device, Satellite satellite) {
+        return MathsHelper.isVisible(
+            satellite.getHeight(), satellite.getPosition(), device.getPosition()
+        );
+    }
+
+    private boolean isVisible(Satellite satellite1, Satellite satellite2) {
+        return MathsHelper.isVisible(
+            satellite1.getHeight(), satellite1.getPosition(), 
+            satellite2.getHeight(), satellite2.getPosition()
+        );
+    }
+
     private boolean isReachableWithRelays(String start, String dest) {
         HashMap<String, Integer> visited = new HashMap<String, Integer>();
 
@@ -65,10 +78,7 @@ public class BlackoutController {
                     Communicator nodeComm = this.activeCommunicators.get(nodeCommStr);
 
                     if (nodeComm instanceof Satellite && currComm instanceof Device) {
-                        if (MathsHelper.isVisible(
-                                this.toSatellite(nodeComm).getHeight(),
-                                this.toSatellite(nodeComm).getPosition(),
-                                this.toDevice(currComm).getPosition())) {
+                        if (isVisible(toDevice(currComm), toSatellite(nodeComm))) {
                             if (nodeCommStr == dest) {
                                 return true;
                             }
@@ -80,11 +90,7 @@ public class BlackoutController {
                     }
 
                     if (nodeComm instanceof Satellite && currComm instanceof Satellite) {
-                        if (MathsHelper.isVisible(
-                                this.toSatellite(nodeComm).getHeight(),
-                                this.toSatellite(nodeComm).getPosition(),
-                                this.toSatellite(currComm).getHeight(),
-                                this.toSatellite(currComm).getPosition())) {
+                        if (isVisible(toSatellite(nodeComm), toSatellite(currComm))) {
                             if (nodeCommStr == dest) {
                                 return true;
                             }
@@ -96,10 +102,7 @@ public class BlackoutController {
                     }
 
                     if (nodeComm instanceof Device && currComm instanceof Satellite) {
-                        if (MathsHelper.isVisible(
-                                this.toSatellite(currComm).getHeight(),
-                                this.toSatellite(currComm).getPosition(),
-                                this.toDevice(nodeComm).getPosition())) {
+                        if (isVisible(toDevice(nodeComm), toSatellite(currComm))) {
                             if (nodeCommStr == dest) {
                                 return true;
                             }
@@ -114,20 +117,13 @@ public class BlackoutController {
     }
 
     private boolean isCommunicable(Satellite satellite1, Satellite satellite2) {
-        boolean inRange = MathsHelper.isVisible(satellite1.getHeight(), satellite1.getPosition(),
-                satellite2.getHeight(), satellite2.getPosition());
-
-        // Need another check using relay satellites
-        return inRange || isReachableWithRelays(satellite1.getId(), satellite2.getId());
+        return isVisible(satellite1, satellite2) 
+            || isReachableWithRelays(satellite1.getId(), satellite2.getId());
     }
 
     private boolean isCommunicable(Device device, Satellite satellite) {
-        boolean inRange = MathsHelper.isVisible(satellite.getHeight(), satellite.getPosition(),
-                device.getPosition());
-        boolean isSupported = satellite.supports(device);
-
-        // Need another check using relay satellites
-        return (inRange && isSupported) || isReachableWithRelays(device.getId(), satellite.getId());
+        return (isVisible(device, satellite) && satellite.supports(device)) 
+            || isReachableWithRelays(device.getId(), satellite.getId());
     }
 
     private void sendFileToTargetSatellite(Satellite targetSat, FileInfoResponse file) throws FileTransferException {

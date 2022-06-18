@@ -1,38 +1,26 @@
 package unsw.entities;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import unsw.response.models.FileInfoResponse;
 import unsw.utils.Angle;
 
 public class Communicator {
     private String id;
-    private int maxRange;
+    private int range;
     private Angle position;
-    private List<FileInfoResponse> files;
+    private double height;
 
-    public Communicator(String id, int maxRange, Angle position) {
+    public Communicator(String id, int range, Angle position, double height) {
         this.id = id;
-        this.maxRange = maxRange;
+        this.range = range;
         this.position = position;
-        this.files = new ArrayList<FileInfoResponse>();
+        this.height = height;
     }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public int getMaxRange() {
-        return maxRange;
-    }
-
-    public void setMaxRange(int maxRange) {
-        this.maxRange = maxRange;
+    public int getRange() {
+        return range;
     }
 
     public Angle getPosition() {
@@ -43,15 +31,8 @@ public class Communicator {
         this.position = position;
     }
 
-    public void setFiles(List<FileInfoResponse> files) {
-        this.files = files;
+    public double getHeight() {
+        return height;
     }
 
-    public List<FileInfoResponse> getFiles() {
-        return files;
-    }
-
-    public void addFile(FileInfoResponse file) {
-        this.files.add(file);
-    }
 }

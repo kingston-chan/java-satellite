@@ -225,4 +225,17 @@ public class Task2ExampleTests {
                 assertListAreEqualIgnoringOrder(Arrays.asList("DeviceB", "Satellite1", "Satellite2"),
                                 controller.communicableEntitiesInRange("Satellite3"));
         }
+
+        @Test
+        public void testReachableFromSatelliteButNotFromDevice() {
+                BlackoutController controller = new BlackoutController();
+                controller.createDevice("DeviceB", "HandheldDevice", Angle.fromDegrees(174));
+                controller.createSatellite("Satellite1", "StandardSatellite", 129770, Angle.fromDegrees(151));
+
+                assertListAreEqualIgnoringOrder(Arrays.asList("DeviceB"),
+                                controller.communicableEntitiesInRange("Satellite1"));
+                System.out.println(controller.communicableEntitiesInRange("DeviceB"));
+                assertListAreEqualIgnoringOrder(Arrays.asList(), controller.communicableEntitiesInRange("DeviceB"));
+        }
+
 }

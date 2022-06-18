@@ -1,167 +1,50 @@
 package unsw.blackout;
 
+import unsw.response.models.EntityInfoResponse;
+import unsw.response.models.FileInfoResponse;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
-
-import unsw.response.models.EntityInfoResponse;
-import unsw.response.models.FileInfoResponse;
 
 import unsw.blackout.FileTransferException.VirtualFileAlreadyExistsException;
-import unsw.blackout.FileTransferException.VirtualFileNoBandwidthException;
-import unsw.blackout.FileTransferException.VirtualFileNoStorageSpaceException;
 import unsw.blackout.FileTransferException.VirtualFileNotFoundException;
+import unsw.blackout.FileTransferException.VirtualFileNoStorageSpaceException;
 
 import unsw.utils.Angle;
-import unsw.utils.MathsHelper;
 import unsw.entities.Device;
+import unsw.entities.FileInTransfer;
 import unsw.entities.RelaySatellite;
 import unsw.entities.Communicator;
 import unsw.entities.Satellite;
 import unsw.entities.StandardSatellite;
 import unsw.entities.TeleportingSatellite;
+import unsw.entities.FileInfo;
+import unsw.entities.FileTransferSatellite;
 
 import static unsw.utils.MathsHelper.RADIUS_OF_JUPITER;
 
 public class BlackoutController {
 
     private HashMap<String, Communicator> activeCommunicators;
+    private List<FileInTransfer> filesInTransfer;
 
     public BlackoutController() {
         this.activeCommunicators = new HashMap<String, Communicator>();
-    }
-
-    private Device toDevice(Communicator communicator) {
-        return (Device) communicator;
-    }
-
-    private Satellite toSatellite(Communicator communicator) {
-        return (Satellite) communicator;
-    }
-
-    private boolean isVisible(Device device, Satellite satellite) {
-        return MathsHelper.isVisible(
-            satellite.getHeight(), satellite.getPosition(), device.getPosition()
-        );
-    }
-
-    private boolean isVisible(Satellite satellite1, Satellite satellite2) {
-        return MathsHelper.isVisible(
-            satellite1.getHeight(), satellite1.getPosition(), 
-            satellite2.getHeight(), satellite2.getPosition()
-        );
-    }
-
-    private boolean isReachableWithRelays(String start, String dest) {
-        HashMap<String, Integer> visited = new HashMap<String, Integer>();
-
-        for (String comm : this.activeCommunicators.keySet()) {
-            visited.put(comm, -1);
-        }
-
-        Stack<String> stack = new Stack<String>();
-
-        stack.push(start);
-
-        while (!stack.empty()) {
-            String currCommStr = stack.pop();
-
-            if (visited.get(currCommStr) == -1) {
-
-                visited.replace(currCommStr, 0);
-
-                Communicator currComm = this.activeCommunicators.get(currCommStr);
-
-                for (String nodeCommStr : this.activeCommunicators.keySet()) {
-                    Communicator nodeComm = this.activeCommunicators.get(nodeCommStr);
-
-                    if (nodeComm instanceof Satellite && currComm instanceof Device) {
-                        if (isVisible(toDevice(currComm), toSatellite(nodeComm))) {
-                            if (nodeCommStr == dest) {
-                                return true;
-                            }
-
-                            if (nodeComm instanceof RelaySatellite && visited.get(nodeCommStr) == -1) {
-                                stack.push(nodeCommStr);
-                            }
-                        }
-                    }
-
-                    if (nodeComm instanceof Satellite && currComm instanceof Satellite) {
-                        if (isVisible(toSatellite(nodeComm), toSatellite(currComm))) {
-                            if (nodeCommStr == dest) {
-                                return true;
-                            }
-
-                            if (nodeComm instanceof RelaySatellite && visited.get(nodeCommStr) == -1) {
-                                stack.push(nodeCommStr);
-                            }
-                        }
-                    }
-
-                    if (nodeComm instanceof Device && currComm instanceof Satellite) {
-                        if (isVisible(toDevice(nodeComm), toSatellite(currComm))) {
-                            if (nodeCommStr == dest) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-
-        return false;
-    }
-
-    private boolean isCommunicable(Satellite satellite1, Satellite satellite2) {
-        return isVisible(satellite1, satellite2) 
-            || isReachableWithRelays(satellite1.getId(), satellite2.getId());
-    }
-
-    private boolean isCommunicable(Device device, Satellite satellite) {
-        return (isVisible(device, satellite) && satellite.supports(device)) 
-            || isReachableWithRelays(device.getId(), satellite.getId());
-    }
-
-    private void sendFileToTargetSatellite(Satellite targetSat, FileInfoResponse file) throws FileTransferException {
-        int maxFilesSupported = targetSat.getMaxFiles();
-        int currFiles = targetSat.getFiles().size();
-        int currSpace = targetSat.getAvailFileStorage();
-
-        if (currFiles + 1 > maxFilesSupported && maxFilesSupported >= 0) {
-            throw new VirtualFileNoStorageSpaceException("Max Files Reached");
-        }
-
-        if (currSpace < file.getFileSize()) {
-            throw new VirtualFileNoStorageSpaceException("Max Storage Reached");
-        }
-
-        int newDownloadCount = targetSat.getDownloadCount() + 1;
-
-        if ((targetSat.getDownloadSpeed() / (newDownloadCount)) == 0) {
-            throw new VirtualFileNoBandwidthException(targetSat.getId());
-        }
-
-        targetSat.addFile(new FileInfoResponse(file.getFilename(), "", file.getFileSize(), false));
-
-        targetSat.setDownloadCount(newDownloadCount);
-
-        targetSat.setAvailFileStorage(targetSat.getAvailFileStorage() - file.getFileSize());
+        this.filesInTransfer = new ArrayList<FileInTransfer>();
     }
 
     public void createDevice(String deviceId, String type, Angle position) {
         switch (type) {
             case "HandheldDevice":
-                this.activeCommunicators.put(deviceId, new Device(deviceId, 50000, position, "HandheldDevice"));
+                this.activeCommunicators.put(deviceId, new Device(deviceId, Device.HANDHELD_RANGE, position, type));
                 break;
             case "LaptopDevice":
-                this.activeCommunicators.put(deviceId, new Device(deviceId, 100000, position, "LaptopDevice"));
+                this.activeCommunicators.put(deviceId, new Device(deviceId, Device.LAPTOP_RANGE, position, type));
                 break;
             case "DesktopDevice":
-                this.activeCommunicators.put(deviceId, new Device(deviceId, 200000, position, "DesktopDevice"));
+                this.activeCommunicators.put(deviceId, new Device(deviceId, Device.DESKTOP_RANGE, position, type));
                 break;
         }
     }
@@ -179,13 +62,7 @@ public class BlackoutController {
                 this.activeCommunicators.put(satelliteId, new TeleportingSatellite(satelliteId, position, height));
                 break;
             case "RelaySatellite":
-                boolean startClockwise = (position.compareTo(Angle.fromDegrees(140)) >= 0
-                        && position.compareTo(Angle.fromDegrees(190)) <= 0)
-                        || (position.compareTo(Angle.fromDegrees(345)) >= 0
-                                && position.compareTo(Angle.fromDegrees(140)) < 0);
-
-                this.activeCommunicators.put(satelliteId,
-                        new RelaySatellite(satelliteId, position, startClockwise, height));
+                this.activeCommunicators.put(satelliteId, new RelaySatellite(satelliteId, position, height));
                 break;
         }
     }
@@ -215,7 +92,8 @@ public class BlackoutController {
     }
 
     public void addFileToDevice(String deviceId, String filename, String content) {
-        this.activeCommunicators.get(deviceId).addFile(new FileInfoResponse(filename, content, content.length(), true));
+        Device device = BlackoutHelpers.toDevice(this.activeCommunicators.get(deviceId));
+        device.getMappedFiles().put(filename, new FileInfo(filename, content, content.length(), false));
     }
 
     public EntityInfoResponse getInfo(String id) {
@@ -224,26 +102,166 @@ public class BlackoutController {
 
         Communicator communicator = this.activeCommunicators.get(id);
         if (communicator instanceof Device) {
-            Device device = (Device) communicator;
-            for (FileInfoResponse file : device.getFiles()) {
-                files.put(file.getFilename(), file);
+            Device device = BlackoutHelpers.toDevice(communicator);
+            for (FileInfo file : device.getFiles()) {
+                files.put(file.getFileName(), new FileInfoResponse(file.getFileName(), file.getFileData(),
+                        file.getFileDataSize(), !file.isInTransfer()));
             }
             entityInfo = new EntityInfoResponse(id, device.getPosition(), RADIUS_OF_JUPITER, device.getType(),
                     files);
         } else {
-            Satellite satellite = (Satellite) communicator;
-            for (FileInfoResponse file : satellite.getFiles()) {
-                files.put(file.getFilename(), file);
+            if (communicator instanceof FileTransferSatellite) {
+                FileTransferSatellite satellite = (FileTransferSatellite) communicator;
+                for (FileInfo file : satellite.getFiles()) {
+                    files.put(file.getFileName(), new FileInfoResponse(file.getFileName(), file.getFileData(),
+                            file.getFileDataSize(), !file.isInTransfer()));
+                }
+                entityInfo = new EntityInfoResponse(id, satellite.getPosition(), satellite.getHeight(),
+                        satellite.getType(),
+                        files);
+            } else {
+                Satellite satellite = (Satellite) communicator;
+                entityInfo = new EntityInfoResponse(id, satellite.getPosition(), satellite.getHeight(),
+                        satellite.getType(),
+                        files);
             }
-            entityInfo = new EntityInfoResponse(id, satellite.getPosition(), satellite.getHeight(), satellite.getType(),
-                    files);
         }
 
         return entityInfo;
     }
 
     public void simulate() {
-        // TODO: Task 2a)
+        for (Communicator comm : this.activeCommunicators.values()) {
+            if (comm instanceof Satellite) {
+                BlackoutHelpers.toSatellite(comm).move();
+            }
+        }
+
+        List<FileInTransfer> stillActiveFileIT = new ArrayList<FileInTransfer>();
+
+        for (FileInTransfer fit : this.filesInTransfer) {
+            // check if the two communicators are communicable
+            if (fit.getSender() instanceof Device) {
+                Device sender = BlackoutHelpers.toDevice(fit.getSender());
+                FileTransferSatellite reciever = BlackoutHelpers.toFileTransferSatellite(fit.getReciever());
+                if (BlackoutHelpers.isCommunicableFromDevToSat(sender, reciever, this.activeCommunicators)) {
+                    // Increase the transfer file's string by recievers download bandwidth and lower
+                    // bandwidth if needed
+                    if (fit.getTransferRate() == 0) {
+                        fit.setTransferRate(reciever.getDownloadBandwidth());
+                    } else if (fit.getTransferRate() > reciever.getDownloadBandwidth()) {
+                        fit.setTransferRate(reciever.getDownloadBandwidth());
+                    }
+
+                    fit.startTransfer();
+
+                    if (!fit.isCompleted()) {
+                        stillActiveFileIT.add(fit);
+                    }
+                } else if (reciever instanceof TeleportingSatellite) {
+                    TeleportingSatellite tpRec = (TeleportingSatellite) reciever;
+                    if (tpRec.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
+                        // TeleportingSatellite tp'ed and is reciever
+                        // Remove file from tp satellite
+                        FileInfo originalFile = fit.getOriginalFile();
+                        tpRec.removeFile(originalFile.getFileName());
+                        // Remove t bytes from sender's file
+                        originalFile.setFileData(originalFile.getFileData().replaceAll("t", ""));
+                        originalFile.updateFileDataSize();
+                    }
+                }
+            } else if (fit.getSender() instanceof TeleportingSatellite) {
+                // Check whether reciever is satellite or device
+                TeleportingSatellite sender = (TeleportingSatellite) fit.getSender();
+                if (fit.getReciever() instanceof Device) {
+                    Device reciever = BlackoutHelpers.toDevice(fit.getReciever());
+                    if (BlackoutHelpers.isCommunicableFromSatToDev(reciever, sender, this.activeCommunicators)) {
+                        if (fit.getTransferRate() == 0) {
+                            fit.setTransferRate(sender.getUploadBandwidth());
+                        } else if (fit.getTransferRate() > sender.getUploadBandwidth()) {
+                            fit.setTransferRate(sender.getUploadBandwidth());
+                        }
+
+                        fit.startTransfer();
+
+                        if (!fit.isCompleted()) {
+                            stillActiveFileIT.add(fit);
+                        }
+                    } else if (sender.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
+                        FileInfo originalFile = fit.getOriginalFile();
+                        FileInfo transferFile = fit.getTransferFile();
+                        String removedTBytes = originalFile.getFileData().replaceAll("t", "");
+                        transferFile.setFileData(removedTBytes);
+                        transferFile.updateFileDataSize();
+                        transferFile.setTransferCompleted();
+                    }
+                } else {
+                    FileTransferSatellite reciever = (FileTransferSatellite) fit.getReciever();
+                    if (BlackoutHelpers.isCommunicableFromSatToSat(sender, reciever, this.activeCommunicators)) {
+                        int transferRate = Math.min(sender.getUploadBandwidth(), reciever.getDownloadBandwidth());
+                        if (fit.getTransferRate() == 0) {
+                            fit.setTransferRate(transferRate);
+                        } else if (fit.getTransferRate() > transferRate) {
+                            fit.setTransferRate(transferRate);
+                        }
+
+                        fit.startTransfer();
+
+                        if (!fit.isCompleted()) {
+                            stillActiveFileIT.add(fit);
+                        }
+                    } else if (sender.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
+                        FileInfo originalFile = fit.getOriginalFile();
+                        FileInfo transferFile = fit.getTransferFile();
+                        String removedTBytes = originalFile.getFileData().replaceAll("t", "");
+                        transferFile.setFileData(removedTBytes);
+                        transferFile.updateFileDataSize();
+                        transferFile.setTransferCompleted();
+                    }
+                }
+            } else {
+                StandardSatellite sender = (StandardSatellite) fit.getSender();
+                if (fit.getReciever() instanceof Device) {
+                    Device reciever = BlackoutHelpers.toDevice(fit.getReciever());
+                    if (BlackoutHelpers.isCommunicableFromSatToDev(reciever, sender, this.activeCommunicators)) {
+                        if (fit.getTransferRate() == 0) {
+                            fit.setTransferRate(sender.getUploadBandwidth());
+                        }
+
+                        fit.startTransfer();
+
+                        if (!fit.isCompleted()) {
+                            stillActiveFileIT.add(fit);
+                        }
+                    }
+                } else {
+                    FileTransferSatellite reciever = (FileTransferSatellite) fit.getReciever();
+                    if (BlackoutHelpers.isCommunicableFromSatToSat(sender, reciever, this.activeCommunicators)) {
+                        int transferRate = Math.min(sender.getUploadBandwidth(), reciever.getDownloadBandwidth());
+                        if (fit.getTransferRate() == 0) {
+                            fit.setTransferRate(transferRate);
+                        } else if (fit.getTransferRate() > transferRate) {
+                            fit.setTransferRate(transferRate);
+                        }
+
+                        fit.startTransfer();
+
+                        if (!fit.isCompleted()) {
+                            stillActiveFileIT.add(fit);
+                        }
+                    } else if (reciever instanceof TeleportingSatellite) {
+                        if (reciever.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
+                            FileInfo originalFile = fit.getOriginalFile();
+                            FileInfo transferFile = fit.getTransferFile();
+                            String removedTBytes = originalFile.getFileData().replaceAll("t", "");
+                            transferFile.setFileData(removedTBytes);
+                            transferFile.updateFileDataSize();
+                            transferFile.setTransferCompleted();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -264,26 +282,27 @@ public class BlackoutController {
         Communicator communicator = this.activeCommunicators.get(id);
 
         if (communicator instanceof Device) {
-            device = (Device) communicator;
+            device = BlackoutHelpers.toDevice(communicator);
             for (String satId : this.listSatelliteIds()) {
-                satellite = (Satellite) this.activeCommunicators.get(satId);
-                if (isCommunicable(device, satellite)) {
+                satellite = BlackoutHelpers.toSatellite(this.activeCommunicators.get(satId));
+                if (BlackoutHelpers.isCommunicableFromDevToSat(device, satellite, this.activeCommunicators)) {
                     communicables.add(satellite.getId());
                 }
             }
         } else {
-            satellite = (Satellite) this.activeCommunicators.get(id);
+            satellite = BlackoutHelpers.toSatellite(this.activeCommunicators.get(id));
 
             for (Map.Entry<String, Communicator> c : this.activeCommunicators.entrySet()) {
                 if (c.getValue() instanceof Device) {
-                    if (isCommunicable((Device) c.getValue(), satellite)) {
+                    if (BlackoutHelpers.isCommunicableFromSatToDev(BlackoutHelpers.toDevice(c.getValue()), satellite,
+                            this.activeCommunicators)) {
                         communicables.add(c.getValue().getId());
                     }
                 } else {
-                    Satellite otherSat = (Satellite) c.getValue();
+                    Satellite otherSat = BlackoutHelpers.toSatellite(c.getValue());
 
                     if (otherSat != satellite) {
-                        if (isCommunicable(satellite, otherSat)) {
+                        if (BlackoutHelpers.isCommunicableFromSatToSat(satellite, otherSat, this.activeCommunicators)) {
                             communicables.add(otherSat.getId());
                         }
                     }
@@ -309,40 +328,44 @@ public class BlackoutController {
             throw new VirtualFileNotFoundException(fileName);
         }
 
+        if (!senderInfo.getFiles().get(fileName).hasTransferCompleted()) {
+            throw new VirtualFileNotFoundException(fileName);
+        }
+
         if (recieverInfo.getFiles().containsKey(fileName)) {
             throw new VirtualFileAlreadyExistsException(fileName);
         }
 
-        FileInfoResponse file = senderInfo.getFiles().get(fileName);
+        if (reciever instanceof RelaySatellite) {
+            throw new VirtualFileNoStorageSpaceException("Max Storage Reached");
+        }
 
-        if (sender instanceof Satellite) {
-            Satellite senderSat = (Satellite) sender;
+        if (sender instanceof Device) {
+            FileTransferSatellite recSat = (FileTransferSatellite) reciever;
+            Device sendDev = (Device) sender;
+            FileInfo originalFile = sendDev.getFile(fileName);
+            FileInfo sentFile = new FileInfo(originalFile.getFileName(), "", originalFile.getFileDataSize(), true);
+            recSat.addFile(sentFile);
+            filesInTransfer.add(new FileInTransfer(sender, reciever, originalFile, sentFile));
+        }
 
-            // Check if sender satellite has enough upload bandwidth
-            int newUploadCount = senderSat.getUploadCount() + 1;
-
-            if ((senderSat.getUploadSpeed() / (newUploadCount)) == 0) {
-                throw new VirtualFileNoBandwidthException(fromId);
-            }
+        if (sender instanceof FileTransferSatellite) {
+            FileTransferSatellite sendSat = (FileTransferSatellite) sender;
+            FileInfo originalFile = sendSat.getFile(fileName);
+            FileInfo sentFile = new FileInfo(originalFile.getFileName(), "", originalFile.getFileDataSize(), true);
 
             if (reciever instanceof Device) {
-                senderSat.setUploadCount(newUploadCount);
-
-                Device device = (Device) reciever;
-
-                device.addFile(new FileInfoResponse(fileName, "", file.getFileSize(), false));
-            } else {
-                Satellite targetSat = (Satellite) reciever;
-
-                sendFileToTargetSatellite(targetSat, file);
-
-                senderSat.setUploadCount(newUploadCount);
+                Device recDev = BlackoutHelpers.toDevice(reciever);
+                recDev.addFile(sentFile);
             }
 
-        } else {
-            Satellite targetSat = (Satellite) reciever;
+            if (reciever instanceof FileTransferSatellite) {
+                FileTransferSatellite recSat = (FileTransferSatellite) reciever;
+                recSat.addFile(sentFile);
+            }
 
-            sendFileToTargetSatellite(targetSat, file);
+            filesInTransfer.add(new FileInTransfer(sender, reciever, originalFile, sentFile));
+            sendSat.startUpload();
         }
     }
 

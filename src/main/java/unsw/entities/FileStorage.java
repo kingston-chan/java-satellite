@@ -1,14 +1,13 @@
 package unsw.entities;
 
-import java.util.List;
-import unsw.blackout.FileTransferException;
+import java.util.HashMap;
 
-public interface FileStorage {
-    public List<FileInfo> getFiles();
+public class FileStorage {
+    private HashMap<String, FileInfo> files;
 
-    public FileInfo getFile(String fileName);
+    public FileStorage() {
+        this.files = new HashMap<>();
+    }
 
-    public void removeFile(String fileName);
-
-    public void addFile(FileInfo file) throws FileTransferException;
+    
 }

@@ -7,52 +7,53 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import unsw.blackout.FileTransferException.VirtualFileAlreadyExistsException;
+import unsw.interfaces.ManageFiles;
 
-public class Device extends Communicator implements FileStorage {
-    public static final int HANDHELD_RANGE = 50000;
-    public static final int LAPTOP_RANGE = 100000;
-    public static final int DESKTOP_RANGE = 200000;
-
+public abstract class Device implements ManageFiles {
+    private String id;
+    private int range;
+    private Angle position;
     private String type;
     private HashMap<String, FileInfo> files;
 
-    public Device(String id, int range, Angle position, String type) {
-        super(id, range, position, MathsHelper.RADIUS_OF_JUPITER);
+    /**
+     * Creates a new instance of device. This should 
+     * not be called when creating a device. To create
+     * a device use the device factory methods.
+     * @param type      type of device
+     * @param range     max range it is able to communicate to
+     */
+    public Device(String type, int range) {
         this.type = type;
-        this.files = new HashMap<String, FileInfo>();
+        this.id = type;
+        this.range = range;
+        this.position = null;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
+    public Angle getPosition() {
+        return position;
+    }
+
+
+    public void setPosition(Angle position) {
+        this.position = position;
+    }
+
+    public int getRange() {
+        return this.range;
     }
 
     public String getType() {
         return type;
-    }
-
-    public HashMap<String, FileInfo> getMappedFiles() {
-        return this.files;
-    }
-
-    @Override
-    public List<FileInfo> getFiles() {
-        return new ArrayList<>(this.files.values());
-    }
-
-    @Override
-    public void addFile(FileInfo file) throws VirtualFileAlreadyExistsException {
-        for (FileInfo deviceFile : this.files.values()) {
-            if (file.equals(deviceFile)) {
-                throw new VirtualFileAlreadyExistsException(file.getFileName());
-            }
-        }
-
-        this.files.put(file.getFileName(), file);
-    }
-
-    @Override
-    public void removeFile(String fileName) {
-        this.files.remove(fileName);
-    }
-
-    @Override
-    public FileInfo getFile(String fileName) {
-        return this.files.get(fileName);
     }
 }

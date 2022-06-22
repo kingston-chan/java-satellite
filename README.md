@@ -19,6 +19,7 @@
   - Fix rounding issue in Task 2 Example `testRelayMovement`
 - Sun 12 Jun 9am: Fix further stale comments on satellite direction in spec and simple example
 - Mon 13 Jun 9pm: Reword comment about files with the same id + clarify teleporting satellite transfer with satellite->satellite
+- Wed 20 Jun 11am: Clarify late submissions
 
 ## 1. Aims
 
@@ -733,13 +734,13 @@ $ git push -f origin submission
 ```
 
 Or, you can create one via the GitLab website by going to Repository > Tags > New Tag.
-We will take the last commit on your master branch before the deadline for your submission.
+We will take your most recent commit on `master` as your submission during marking. Any commits on `master` after the deadline will be taken as a late submission.
 
 Make sure you include your `design.pdf` and `blog.md` in your repository when you submit.
 
 ## 11.1 Late Penalties
 
-The late penalty for the submission is the standard UNSW late penalty of a 5% per day reduction of the maximum assignment mark. For example, if the assignment would receive an on-time mark of 70% and was submitted 3 days late the actual mark would be 55%.
+The late penalty for the submission is the standard UNSW late penalty of a 5% per day reduction of the on-time assignment mark. For example, if the assignment would receive an on-time mark of 70% and was submitted 3 days late the actual mark would be 55%.
 
 You _must_ submit by Friday 5pm, Week 5 or you will receive `0` for this assignment.
 

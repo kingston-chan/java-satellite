@@ -157,7 +157,12 @@ public class BlackoutHelpers {
         return communicables;
     }
 
-    public static void replaceTBytes(FileInfo file) {
+    /**
+     * Remove "t" bytes from given file
+     * 
+     * @param file
+     */
+    public static void removeTBytes(FileInfo file) {
         String fileData = file.getFileData();
         file.setFileData(fileData.replaceAll("t", ""));
         file.updateFileSize();

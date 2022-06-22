@@ -100,11 +100,7 @@ public class BlackoutController {
                     stillActiveFITs.add(fit);
                 }
             } else if (sender.canTeleport() && sender.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
-                // Sender teleported
-                // Behaviour same for both device and satellite, reciever's file is removed of
-                // "t" bytes and file is
-                // instantly downloaded
-                BlackoutHelpers.replaceTBytes(transferFile);
+                BlackoutHelpers.removeTBytes(transferFile);
                 senderBandwidthControl.endUpload();
                 receiverBandwidthControl.endDownload();
             } else if (reciever.canTeleport() && reciever.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
@@ -112,9 +108,9 @@ public class BlackoutController {
                 // Sender must be either satellite or device
                 // if sender is satellite same behaviour as above
                 if (sender.doesOrbit()) {
-                    BlackoutHelpers.replaceTBytes(transferFile);
+                    BlackoutHelpers.removeTBytes(transferFile);
                 } else {
-                    BlackoutHelpers.replaceTBytes(originalFile);
+                    BlackoutHelpers.removeTBytes(originalFile);
                     senderFileStorage.removeFile(transferFile.getFileName());
                 }
                 senderBandwidthControl.endUpload();

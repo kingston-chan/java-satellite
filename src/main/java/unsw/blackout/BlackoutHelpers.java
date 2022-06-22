@@ -162,9 +162,8 @@ public class BlackoutHelpers {
      * 
      * @param file
      */
-    public static void removeTBytes(FileInfo file) {
-        String fileData = file.getFileData();
-        file.setFileData(fileData.replaceAll("t", ""));
+    public static void removeTBytes(FileInfo file, String originalData) {
+        file.setFileData(originalData.replaceAll("t", ""));
         file.updateFileSize();
         file.completeTransfer();
     }

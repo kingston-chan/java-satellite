@@ -21,6 +21,12 @@ import unsw.entities.filemanagement.FileInfo;
 import unsw.entities.filemanagement.FileStorage;
 import unsw.entities.other.BandwidthControl;
 
+/**
+ * BlackoutController helps stores and get devices and satellites.
+ * It also provides information for active devices and satellites
+ * and simulates what would happen for a given minute for the devices
+ * and satellites.
+ */
 public class BlackoutController {
 
     private HashMap<String, BlackoutObject> blackoutObjects = new HashMap<String, BlackoutObject>();
@@ -67,16 +73,19 @@ public class BlackoutController {
                 blackoutObject.getType(), files);
     }
 
+    /**
+     * Simulates the blackout app of one minute. The blackout objects
+     * moves before the transfer of files begins so it ensures that
+     * if the reciever becomes out of range for the sender it stops the
+     * file transfer.
+     */
     public void simulate() {
         for (BlackoutObject blackoutObject : this.blackoutObjects.values()) {
             blackoutObject.doMove();
         }
 
-        // Do transfer files
         List<FileInTransfer> stillActiveFITs = new ArrayList<FileInTransfer>();
         for (FileInTransfer fit : filesInTransfer) {
-            // First check if communicable, if not 2 cases, either sender or reciever
-            // teleported or just moved out of range
             BlackoutObject sender = fit.getSender();
             BlackoutObject reciever = fit.getReciever();
 
@@ -90,9 +99,11 @@ public class BlackoutController {
             FileInfo originalFile = fit.getOriginalFile();
 
             if (communicableEntitiesInRange(sender.getId()).contains(reciever.getId())) {
-                // do file transfer
+                // Reciever is still in range to sender
                 int transferRate = senderBandwidthControl.getMaxTransferRate(receiverBandwidthControl);
+
                 fit.startTransfer(transferRate);
+
                 if (fit.isCompleted()) {
                     senderBandwidthControl.endUpload();
                     receiverBandwidthControl.endDownload();
@@ -100,23 +111,28 @@ public class BlackoutController {
                     stillActiveFITs.add(fit);
                 }
             } else if (sender.canTeleport() && sender.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
-                BlackoutHelpers.removeTBytes(transferFile);
+                // Sender is downloading file and it teleported, so the transfer file is
+                // instantly downloaded, but "t" bytes are removed from transfer file.
+                BlackoutHelpers.removeTBytes(transferFile, originalFile.getFileData());
+
                 senderBandwidthControl.endUpload();
                 receiverBandwidthControl.endDownload();
             } else if (reciever.canTeleport() && reciever.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
                 // Reciever teleported
-                // Sender must be either satellite or device
-                // if sender is satellite same behaviour as above
                 if (sender.doesOrbit()) {
-                    BlackoutHelpers.removeTBytes(transferFile);
+                    // Sender is satellite so it does the same thing as if it was the reciever
+                    BlackoutHelpers.removeTBytes(transferFile, originalFile.getFileData());
                 } else {
-                    BlackoutHelpers.removeTBytes(originalFile);
+                    // Device is the sender so its file gets all its "t" bytes removed and the
+                    // reciever cancels its download.
+                    BlackoutHelpers.removeTBytes(originalFile, originalFile.getFileData());
                     senderFileStorage.removeFile(transferFile.getFileName());
                 }
+
                 senderBandwidthControl.endUpload();
                 receiverBandwidthControl.endDownload();
             } else {
-                // out of range
+                // Reciever is no longer in range of sender
                 recieverFileStorage.removeFile(transferFile.getFileName());
                 receiverBandwidthControl.endDownload();
                 senderBandwidthControl.endUpload();
@@ -136,11 +152,40 @@ public class BlackoutController {
         }
     }
 
+    /**
+     * This uses a depth first search to find communicable
+     * entities. To know how it works look in BlackoutHelpers
+     * 
+     * @param id
+     * @return list of communicable entities
+     */
     public List<String> communicableEntitiesInRange(String id) {
         BlackoutObject source = this.blackoutObjects.get(id);
         return BlackoutHelpers.dfsFindCommunicables(source, this.blackoutObjects);
     }
 
+    /**
+     * Sends a file from device/satellite to another device/satellite
+     * (but no device to device)
+     * 
+     * @param fileName
+     * @param fromId
+     * @param toId
+     * @throws VirtualFileNotFoundException       if file to be sent is not to be
+     *                                            found in sender's file storage
+     *                                            or it is in sender's file storage
+     *                                            but its being downloaded
+     * @throws VirtualFileAlreadyExistsException  if file to be send already exists
+     *                                            in reciever's file storage
+     * @throws VirtualFileNoStorageSpaceException if reciever has reach max capacity
+     *                                            on either the number of files
+     *                                            it can store or the number of
+     *                                            bytes it can store
+     * @throws VirtualFileNoBandwidthException    if either the sender does not have
+     *                                            enough upload bandwidth or the
+     *                                            reciever does not have enought
+     *                                            download bandwidth
+     */
     public void sendFile(String fileName, String fromId, String toId) throws FileTransferException {
         if (!this.communicableEntitiesInRange(fromId).contains(toId)) {
             throw new FileTransferException("Not in range");

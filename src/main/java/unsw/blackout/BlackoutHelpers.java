@@ -1,123 +1,166 @@
 package unsw.blackout;
 
 import unsw.utils.MathsHelper;
-import unsw.entities.Device;
-import unsw.entities.RelaySatellite;
-import unsw.entities.Communicator;
-import unsw.entities.FileTransferSatellite;
-import unsw.entities.Satellite;
+import unsw.entities.BlackoutObject;
+import unsw.entities.filemanagement.FileInfo;
+import unsw.entities.filemanagement.FileStorage;
+import unsw.response.models.FileInfoResponse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Stack;
 
+/**
+ * Helper functions for BlackoutController
+ * 
+ * @author Kingston Chan
+ */
 public class BlackoutHelpers {
-    public static Device toDevice(Communicator communicator) {
-        return (Device) communicator;
-    }
 
-    public static Satellite toSatellite(Communicator communicator) {
-        return (Satellite) communicator;
-    }
-
-    public static FileTransferSatellite toFileTransferSatellite(Communicator communicator) {
-        return (FileTransferSatellite) communicator;
-    }
-
-    public static boolean isVisible(Satellite toSat, Satellite fromSat) {
-        return MathsHelper.isVisible(
-                toSat.getHeight(), toSat.getPosition(),
-                fromSat.getHeight(), fromSat.getPosition());
-    }
-
-    public static boolean isVisible(Satellite toSat, Device fromDev) {
-        return MathsHelper.isVisible(
-                toSat.getHeight(), toSat.getPosition(), fromDev.getPosition());
-    }
-
-    public static boolean isCommunicableFromSatToSat(Satellite fromSat, Satellite toSat,
-            HashMap<String, Communicator> comms) {
-        return isVisible(fromSat, toSat)
-                || isReachableWithRelays(fromSat.getId(), toSat.getId(), comms);
-    }
-
-    public static boolean isCommunicableFromSatToDev(Device toDev, Satellite fromSat,
-            HashMap<String, Communicator> comms) {
-        return (isVisible(fromSat, toDev) && fromSat.supports(toDev))
-                || isReachableWithRelays(toDev.getId(), fromSat.getId(), comms);
-    }
-
-    public static boolean isCommunicableFromDevToSat(Device fromDev, Satellite toSat,
-            HashMap<String, Communicator> comms) {
-        return (MathsHelper.getDistance(toSat.getHeight(), toSat.getPosition(),
-                fromDev.getPosition()) <= (double) fromDev.getRange() && toSat.supports(fromDev))
-                || isReachableWithRelays(fromDev.getId(), toSat.getId(), comms);
-    }
-
-    public static boolean isReachableWithRelays(String start, String dest, HashMap<String, Communicator> comms) {
-        HashMap<String, Integer> visited = new HashMap<String, Integer>();
-
-        for (String comm : comms.keySet()) {
-            visited.put(comm, -1);
+    /**
+     * Helps map the devices/satellite's file storage into a hash map of
+     * FileInfoResponses
+     * 
+     * @param fileStorage device/satellite file storage
+     * @return HashMap containing filenames as keys and FileInfoResponses as values
+     */
+    public static HashMap<String, FileInfoResponse> mapToFileInfoResponse(FileStorage fileStorage) {
+        HashMap<String, FileInfoResponse> files = new HashMap<String, FileInfoResponse>();
+        for (FileInfo file : fileStorage.getFiles()) {
+            files.put(file.getFileName(), new FileInfoResponse(file.getFileName(), file.getFileData(),
+                    file.getFileSize(), !file.isInTransfer()));
         }
+        return files;
+    }
+
+    /**
+     * Gets a list of either satellites or devices ids
+     * 
+     * @param isSatellites    whether to get a list of satellites
+     * @param blackoutObjects HashMap containing a id key and a blackout object
+     *                        value
+     * @return list of string ids (either of satellites or devices)
+     */
+    public static List<String> getSatOrDeviceIds(boolean isSatellites,
+            HashMap<String, BlackoutObject> blackoutObjects) {
+        List<String> blackoutObjectsIds = new ArrayList<String>();
+        for (BlackoutObject bo : blackoutObjects.values()) {
+            if (bo.doesOrbit() == isSatellites) {
+                blackoutObjectsIds.add(bo.getId());
+            }
+        }
+        return blackoutObjectsIds;
+    }
+
+    /**
+     * Checks whether two blackout objects are visible
+     * 
+     * @param bo1
+     * @param bo2
+     * @return whether two blackout objects are visible
+     */
+    private static boolean isVisible(BlackoutObject bo1, BlackoutObject bo2) {
+        if (!bo1.doesOrbit()) {
+            return MathsHelper.isVisible(bo2.getHeight(), bo2.getPosition(), bo1.getPosition());
+        } else if (!bo2.doesOrbit()) {
+            return MathsHelper.isVisible(bo1.getHeight(), bo1.getPosition(), bo2.getPosition());
+        }
+        return MathsHelper.isVisible(bo1.getHeight(), bo1.getPosition(), bo2.getHeight(), bo2.getPosition());
+    }
+
+    /**
+     * Gets the distance between two blackout objects
+     * 
+     * @param bo1
+     * @param bo2
+     * @return distance between two blackout objects
+     */
+    private static double getDistance(BlackoutObject bo1, BlackoutObject bo2) {
+        return MathsHelper.getDistance(bo1.getHeight(), bo1.getPosition(), bo2.getHeight(),
+                bo2.getPosition());
+    }
+
+    /**
+     * Checks whether two different blackout objects support each other
+     * 
+     * @param source
+     * @param target
+     * @return two different blackout objects support each other
+     */
+    private static boolean supportsEachOther(BlackoutObject source, BlackoutObject target) {
+        return source.doesSupport(target.getType()) && target.doesSupport(source.getType())
+                && !source.equals(target);
+    }
+
+    /**
+     * Checks whether the source blackout object can communicate with the target
+     * blackout object such that they are not the same blackout object
+     * 
+     * @param source
+     * @param target
+     * @return whether two different blackout objects can communicate
+     */
+    private static boolean isCommunicable(BlackoutObject source, BlackoutObject target) {
+        return isVisible(source, target) && getDistance(source, target) <= source.getRange() && !source.equals(target)
+                && supportsEachOther(source, target);
+    }
+
+    /**
+     * Use depth first search to find all the communicable blackout objects since
+     * relay acts as nodes in a graph
+     * 
+     * @param source          is the blackout object that requires the list of its
+     *                        communicable blackout object
+     * @param blackoutObjects hashmap of active blackout objects
+     * @return list of communicable blackout objects
+     */
+    public static List<String> dfsFindCommunicables(BlackoutObject source,
+            HashMap<String, BlackoutObject> blackoutObjects) {
+        List<String> communicables = new ArrayList<String>();
+
+        HashMap<String, Integer> visited = new HashMap<String, Integer>();
 
         Stack<String> stack = new Stack<String>();
 
-        stack.push(start);
+        for (BlackoutObject blackoutObject : blackoutObjects.values()) {
+            if (isCommunicable(source, blackoutObject)) {
+                stack.push(blackoutObject.getId());
+            }
+            visited.put(blackoutObject.getId(), -1);
+        }
 
         while (!stack.empty()) {
-            String currCommStr = stack.pop();
+            String currentBlackoutObjectId = stack.pop();
 
-            if (visited.get(currCommStr) == -1) {
+            if (visited.get(currentBlackoutObjectId) == -1) {
 
-                visited.replace(currCommStr, 0);
+                visited.replace(currentBlackoutObjectId, 0);
 
-                Communicator currComm = comms.get(currCommStr);
+                communicables.add(currentBlackoutObjectId);
 
-                for (String nodeCommStr : comms.keySet()) {
-                    Communicator nodeComm = comms.get(nodeCommStr);
+                BlackoutObject currentBlackoutObject = blackoutObjects.get(currentBlackoutObjectId);
 
-                    // From device to satellite
-                    if (nodeComm instanceof Satellite && currComm instanceof Device) {
-                        if (MathsHelper.getDistance(toSatellite(nodeComm).getHeight(),
-                                toSatellite(nodeComm).getPosition(),
-                                toDevice(currComm).getPosition()) <= toDevice(currComm).getRange()) {
-                            if (nodeCommStr == dest) {
-                                return true;
-                            }
-
-                            if (nodeComm instanceof RelaySatellite && visited.get(nodeCommStr) == -1) {
-                                stack.push(nodeCommStr);
-                            }
-                        }
-                    }
-
-                    // From satellite to another satellite
-                    if (nodeComm instanceof Satellite && currComm instanceof Satellite) {
-                        if (isVisible(toSatellite(nodeComm), toSatellite(currComm))) {
-                            if (nodeCommStr == dest) {
-                                return true;
-                            }
-
-                            if (nodeComm instanceof RelaySatellite && visited.get(nodeCommStr) == -1) {
-                                stack.push(nodeCommStr);
-                            }
-                        }
-                    }
-
-                    // From satellite to device
-                    if (nodeComm instanceof Device && currComm instanceof Satellite) {
-                        if (isVisible(toSatellite(currComm), toDevice(nodeComm))) {
-                            if (nodeCommStr == dest) {
-                                return true;
-                            }
+                if (currentBlackoutObject.canExtendRange()) {
+                    for (BlackoutObject blackoutObject : blackoutObjects.values()) {
+                        if (isCommunicable(currentBlackoutObject, blackoutObject) &&
+                                supportsEachOther(source, blackoutObject)) {
+                            stack.push(blackoutObject.getId());
                         }
                     }
                 }
+
             }
 
         }
 
-        return false;
+        return communicables;
     }
 
+    public static void replaceTBytes(FileInfo file) {
+        String fileData = file.getFileData();
+        file.setFileData(fileData.replaceAll("t", ""));
+        file.updateFileSize();
+        file.completeTransfer();
+    }
 }

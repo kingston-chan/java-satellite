@@ -215,6 +215,7 @@ public class Task2ExampleTests {
                 BlackoutController controller = new BlackoutController();
 
                 controller.createDevice("DeviceB", "LaptopDevice", Angle.fromDegrees(136));
+                controller.createDevice("DeviceC", "HandheldDevice", Angle.fromDegrees(28));
                 controller.createSatellite("Satellite1", "RelaySatellite", 82292, Angle.fromDegrees(169));
                 controller.createSatellite("Satellite2", "RelaySatellite", 104863, Angle.fromDegrees(240));
                 controller.createSatellite("Satellite3", "StandardSatellite", 92373, Angle.fromDegrees(327));

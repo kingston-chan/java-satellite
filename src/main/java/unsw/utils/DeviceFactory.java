@@ -1,14 +1,18 @@
 package unsw.utils;
 
-import unsw.entities.DesktopDevice;
-import unsw.entities.Device;
-import unsw.entities.HandheldDevice;
-import unsw.entities.LaptopDevice;
+import unsw.entities.BlackoutObject;
+import unsw.entities.devices.DesktopDevice;
+import unsw.entities.devices.HandheldDevice;
+import unsw.entities.devices.LaptopDevice;
 
 import java.util.HashMap;
 
+/**
+ * DeviceFactory helps create new devices by giving a type.
+ * To add more types, just add into the hashmap in constructor
+ */
 public class DeviceFactory {
-    private HashMap<String, Device> deviceFactory = new HashMap<String, Device>();
+    private HashMap<String, BlackoutObject> deviceFactory = new HashMap<String, BlackoutObject>();
 
     public DeviceFactory() {
         this.deviceFactory.put("HandheldDevice", new HandheldDevice());
@@ -16,8 +20,16 @@ public class DeviceFactory {
         this.deviceFactory.put("DesktopDevice", new DesktopDevice());
     }
 
-    public Device createNewDevice(String id, Angle position, String type) {
-        Device newDevice = deviceFactory.get(type);
+    /**
+     * Returns a new device type
+     * 
+     * @param id       name of device
+     * @param position of device
+     * @param type     of device
+     * @return a new given type of device
+     */
+    public BlackoutObject createNewDevice(String id, Angle position, String type) {
+        BlackoutObject newDevice = deviceFactory.get(type);
         newDevice.setId(id);
         newDevice.setPosition(position);
         return newDevice;

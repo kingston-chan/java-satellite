@@ -16,11 +16,16 @@ import unsw.utils.MovingHelpers;
 public class MoveWithTeleporting implements MoveBehavior {
     private int direction = MathsHelper.ANTI_CLOCKWISE;
 
+    private boolean reachedTeleportAngle(Angle position) {
+        return (position.compareTo(Angle.fromDegrees(180)) >= 0 && this.direction == MathsHelper.ANTI_CLOCKWISE) ||
+                (position.compareTo(Angle.fromDegrees(180)) <= 0 && this.direction == MathsHelper.CLOCKWISE);
+    }
+
     @Override
     public Angle move(Angle position, double angularVelocity) {
         Angle newPosition = MovingHelpers.moveUsingDirection(direction, position, angularVelocity);
-        if (newPosition.compareTo(Angle.fromDegrees(180)) >= 0) {
-            this.direction *= -1; // Alternates direction when teleports
+        if (reachedTeleportAngle(newPosition)) {
+            this.direction = this.direction * -1; // Alternates direction when teleports
             return Angle.fromDegrees(0);
         }
 

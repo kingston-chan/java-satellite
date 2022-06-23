@@ -137,17 +137,17 @@ public class FileTransferTests {
 
                 double expectedSatellite1Position = Math.toRadians(62) + ((TELEPORTING_SPEED / 82092.0) * 80);
 
-                assertEquals((double) Math.round(expectedSatellite1Position * 100) / 100,
-                                (double) Math.round(controller.getInfo("Satellite1").getPosition().toRadians() * 100)
-                                                / 100);
+                assertEquals((double) Math.round(expectedSatellite1Position * 1000) / 1000,
+                                (double) Math.round(controller.getInfo("Satellite1").getPosition().toRadians() * 1000)
+                                                / 1000);
 
                 controller.simulate(80);
 
                 expectedSatellite1Position += ((TELEPORTING_SPEED / 82092.0) * 80);
 
-                assertEquals((double) Math.round(expectedSatellite1Position * 100) / 100,
-                                (double) Math.round(controller.getInfo("Satellite1").getPosition().toRadians() * 100)
-                                                / 100);
+                assertEquals((double) Math.round(expectedSatellite1Position * 1000) / 1000,
+                                (double) Math.round(controller.getInfo("Satellite1").getPosition().toRadians() * 1000)
+                                                / 1000);
 
                 controller.createDevice("DeviceB", "DesktopDevice", Angle.fromDegrees(177));
 

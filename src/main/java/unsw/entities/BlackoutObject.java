@@ -22,8 +22,8 @@ public abstract class BlackoutObject {
     private double height;
     private int linearSpeed;
     private HashMap<String, Boolean> objectsSupported = new HashMap<>();
-    private FileStorage fileStorage = null;
-    private BandwidthControl bandwidthControl = null;
+    private FileStorage fileStorage;
+    private BandwidthControl bandwidthControl;
     private MoveBehavior moveBehavior;
 
     /**

@@ -99,15 +99,8 @@ public class BlackoutController {
             FileInfo originalFile = fit.getOriginalFile();
 
             if (communicableEntitiesInRange(sender.getId()).contains(reciever.getId())) {
-                // Reciever is still in range to sender
-                int transferRate = senderBandwidthControl.getMaxTransferRate(receiverBandwidthControl);
-
-                fit.startTransfer(transferRate);
-
-                if (fit.isCompleted()) {
-                    senderBandwidthControl.endUpload();
-                    receiverBandwidthControl.endDownload();
-                } else {
+                // Reciever is in range of sender
+                if (!BlackoutHelpers.doFileTransfer(senderBandwidthControl, receiverBandwidthControl, fit)) {
                     stillActiveFITs.add(fit);
                 }
             } else if (sender.canTeleport() && sender.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
@@ -115,8 +108,7 @@ public class BlackoutController {
                 // instantly downloaded, but "t" bytes are removed from transfer file.
                 BlackoutHelpers.removeTBytes(transferFile, originalFile.getFileData());
 
-                senderBandwidthControl.endUpload();
-                receiverBandwidthControl.endDownload();
+                BlackoutHelpers.finishUploadDownload(senderBandwidthControl, senderBandwidthControl);
             } else if (reciever.canTeleport() && reciever.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
                 // Reciever teleported
                 if (sender.doesOrbit()) {
@@ -129,13 +121,11 @@ public class BlackoutController {
                     senderFileStorage.removeFile(transferFile.getFileName());
                 }
 
-                senderBandwidthControl.endUpload();
-                receiverBandwidthControl.endDownload();
+                BlackoutHelpers.finishUploadDownload(senderBandwidthControl, senderBandwidthControl);
             } else {
                 // Reciever is no longer in range of sender
                 recieverFileStorage.removeFile(transferFile.getFileName());
-                receiverBandwidthControl.endDownload();
-                senderBandwidthControl.endUpload();
+                BlackoutHelpers.finishUploadDownload(senderBandwidthControl, senderBandwidthControl);
             }
         }
 
@@ -177,7 +167,9 @@ public class BlackoutController {
      *                                            but its being downloaded
      * @throws VirtualFileAlreadyExistsException  if file to be send already exists
      *                                            in reciever's file storage
-     * @throws VirtualFileNoStorageSpaceException if reciever has reach max capacity
+     * @throws VirtualFileNoStorageSpaceException if reciever does not have a file
+     *                                            storage or reciever has file
+     *                                            storage and has reach max capacity
      *                                            on either the number of files
      *                                            it can store or the number of
      *                                            bytes it can store
@@ -207,6 +199,10 @@ public class BlackoutController {
             throw new VirtualFileNotFoundException(fileName);
         }
 
+        if (receiverFileStorage == null) {
+            throw new VirtualFileNoStorageSpaceException("Max Files Reached");
+        }
+
         if (receiverFileStorage.fileStorageContainsFile(fileName)) {
             throw new VirtualFileAlreadyExistsException(fileName);
         }
@@ -222,11 +218,11 @@ public class BlackoutController {
         BandwidthControl senderBandwidthControl = sender.getBandwidthControl();
         BandwidthControl recieverBandwidthControl = receiver.getBandwidthControl();
 
-        if (!senderBandwidthControl.initiateUpload()) {
+        if (senderBandwidthControl != null && !senderBandwidthControl.initiateUpload()) {
             throw new VirtualFileNoBandwidthException(fromId);
         }
 
-        if (!recieverBandwidthControl.initiateDownload()) {
+        if (recieverBandwidthControl != null && !recieverBandwidthControl.initiateDownload()) {
             senderBandwidthControl.endUpload();
             throw new VirtualFileNoBandwidthException(toId);
         }

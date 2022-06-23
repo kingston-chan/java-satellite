@@ -22,10 +22,10 @@ import unsw.entities.other.BandwidthControl;
  * @author Kingston Chan
  */
 public class TeleportingSatellite extends BlackoutObject {
-    private static final int TELEPORTING_SPEED = 1000;
-    private static final int TELEPORTING_RANGE = 200000;
-    private static final int TELEPORTING_UPLOAD = 10;
-    private static final int TELEPORTING_DOWNLOAD = 15;
+    private final int TELEPORTING_SPEED = 1000;
+    private final int TELEPORTING_RANGE = 200000;
+    private final int TELEPORTING_UPLOAD = 10;
+    private final int TELEPORTING_DOWNLOAD = 15;
     private final int MAX_FILES = -1;
     private final int MAX_BYTES = 200;
 

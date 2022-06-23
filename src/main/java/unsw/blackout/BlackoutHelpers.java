@@ -2,8 +2,10 @@ package unsw.blackout;
 
 import unsw.utils.MathsHelper;
 import unsw.entities.BlackoutObject;
+import unsw.entities.filemanagement.FileInTransfer;
 import unsw.entities.filemanagement.FileInfo;
 import unsw.entities.filemanagement.FileStorage;
+import unsw.entities.other.BandwidthControl;
 import unsw.response.models.FileInfoResponse;
 
 import java.util.ArrayList;
@@ -23,10 +25,16 @@ public class BlackoutHelpers {
      * FileInfoResponses
      * 
      * @param fileStorage device/satellite file storage
-     * @return HashMap containing filenames as keys and FileInfoResponses as values
+     * @return HashMap containing filenames as keys and FileInfoResponses as values,
+     *         empty if no file storage
      */
     public static HashMap<String, FileInfoResponse> mapToFileInfoResponse(FileStorage fileStorage) {
         HashMap<String, FileInfoResponse> files = new HashMap<String, FileInfoResponse>();
+
+        if (fileStorage == null) {
+            return files;
+        }
+
         for (FileInfo file : fileStorage.getFiles()) {
             files.put(file.getFileName(), new FileInfoResponse(file.getFileName(), file.getFileData(),
                     file.getFileSize(), !file.isInTransfer()));
@@ -166,5 +174,53 @@ public class BlackoutHelpers {
         file.setFileData(originalData.replaceAll("t", ""));
         file.updateFileSize();
         file.completeTransfer();
+    }
+
+    /**
+     * Does the file transfer for the given file in transfer. Either the sender or
+     * reciever must have a bandwidth control, otherwise this will not work.
+     * 
+     * @param senderBC       sender's bandwidth control, if sender does not have one
+     *                       it is null
+     * @param receiverBC     reciever's bandwidth control, if reciever does not have
+     *                       on it is null
+     * @param fileInTransfer the file that is currently being uploaded/downloaded
+     * @return whether the transfer is complete or not
+     */
+    public static boolean doFileTransfer(BandwidthControl senderBC, BandwidthControl receiverBC,
+            FileInTransfer fileInTransfer) {
+        int transferRate;
+
+        if (senderBC == null) {
+            transferRate = receiverBC.getDownloadBandwidth();
+        } else if (receiverBC == null) {
+            transferRate = senderBC.getUploadBandwidth();
+        } else {
+            transferRate = senderBC.getMaxTransferRate(receiverBC);
+        }
+
+        fileInTransfer.startTransfer(transferRate);
+
+        if (fileInTransfer.isCompleted()) {
+            finishUploadDownload(senderBC, receiverBC);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Ends the download for the sender or reciever
+     * 
+     * @param senderBC
+     * @param receiverBC
+     */
+    public static void finishUploadDownload(BandwidthControl senderBC, BandwidthControl receiverBC) {
+        if (senderBC != null) {
+            senderBC.endUpload();
+        }
+
+        if (receiverBC != null) {
+            receiverBC.endDownload();
+        }
     }
 }

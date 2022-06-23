@@ -2,7 +2,6 @@ package unsw.entities.devices;
 
 import unsw.entities.BlackoutObject;
 import unsw.entities.filemanagement.FileStorage;
-import unsw.entities.other.BandwidthControl;
 import unsw.interfaces.MoveBehavior;
 import unsw.utils.MathsHelper;
 
@@ -22,7 +21,7 @@ public class DesktopDevice extends BlackoutObject {
         super(moveBehavior);
         this.setRange(DESKTOP_RANGE);
         this.setHeight(MathsHelper.RADIUS_OF_JUPITER);
-        this.setBandwidthControl(new BandwidthControl(-1, -1));
+        this.setBandwidthControl(null);
         this.setFileStorage(new FileStorage(-1, -1));
         this.removeSupport("HandheldDevice");
         this.removeSupport("LaptopDevice");

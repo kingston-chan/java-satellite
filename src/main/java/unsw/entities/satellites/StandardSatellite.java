@@ -13,10 +13,10 @@ import unsw.entities.other.BandwidthControl;
  * @author Kingston Chan
  */
 public class StandardSatellite extends BlackoutObject {
-    private static final int STANDARD_SPEED = 2500;
-    private static final int STANDARD_RANGE = 150000;
-    private static final int STANDARD_UPLOAD = 1;
-    private static final int STANDARD_DOWNLOAD = 1;
+    private final int STANDARD_SPEED = 2500;
+    private final int STANDARD_RANGE = 150000;
+    private final int STANDARD_UPLOAD = 1;
+    private final int STANDARD_DOWNLOAD = 1;
     private final int MAX_FILES = 3;
     private final int MAX_BYTES = 80;
 

@@ -239,8 +239,12 @@ public class BlackoutController {
     }
 
     public void createDevice(String deviceId, String type, Angle position, boolean isMoving) {
-        createDevice(deviceId, type, position);
-        // TODO: Task 3
+        if (isMoving) {
+            DeviceFactory deviceFactory = new DeviceFactory();
+            this.blackoutObjects.put(deviceId, deviceFactory.createNewMovingDevice(deviceId, position, type));
+        } else {
+            createDevice(deviceId, type, position);
+        }
     }
 
     public void createSlope(int startAngle, int endAngle, int gradient) {

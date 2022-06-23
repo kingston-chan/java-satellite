@@ -2,8 +2,8 @@ package unsw.entities.devices;
 
 import unsw.entities.BlackoutObject;
 import unsw.entities.filemanagement.FileStorage;
-import unsw.entities.movement.Immobile;
 import unsw.entities.other.BandwidthControl;
+import unsw.interfaces.MoveBehavior;
 import unsw.utils.MathsHelper;
 
 /**
@@ -18,8 +18,8 @@ public class HandheldDevice extends BlackoutObject {
      * Like all devices, it HandheldDevices should
      * only be created with DeviceFactory
      */
-    public HandheldDevice() {
-        super(new Immobile());
+    public HandheldDevice(MoveBehavior moveBehavior) {
+        super(moveBehavior);
         this.setRange(HANDHELD_RANGE);
         this.setHeight(MathsHelper.RADIUS_OF_JUPITER);
         this.setBandwidthControl(new BandwidthControl(-1, -1));

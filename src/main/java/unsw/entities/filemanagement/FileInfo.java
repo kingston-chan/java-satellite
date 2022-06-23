@@ -102,6 +102,20 @@ public class FileInfo {
         this.inTransfer = false;
     }
 
+    /**
+     * Remove "t" bytes from given file starting from given starting index
+     * 
+     * @param file         file to remove "t" bytes from
+     * @param originalData original data that was being uploaded/downloaded
+     * @param startIndex   index at which to start removing "t" bytes
+     */
+    public void removeTBytes(String originalData, int startIndex) {
+        this.setFileData(
+                originalData.substring(0, startIndex) + originalData.substring(startIndex).replaceAll("t", ""));
+        this.updateFileSize();
+        this.completeTransfer();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

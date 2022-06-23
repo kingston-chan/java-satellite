@@ -166,20 +166,6 @@ public class BlackoutHelpers {
     }
 
     /**
-     * Remove "t" bytes from given file starting from given starting index
-     * 
-     * @param file         file to remove "t" bytes from
-     * @param originalData original data that was being uploaded/downloaded
-     * @param startIndex   index at which to start removing "t" bytes
-     */
-    public static void removeTBytes(FileInfo file, String originalData, int startIndex) {
-        file.setFileData(
-                originalData.substring(0, startIndex) + originalData.substring(startIndex).replaceAll("t", ""));
-        file.updateFileSize();
-        file.completeTransfer();
-    }
-
-    /**
      * Does the file transfer for the given file in transfer. Either the sender or
      * reciever must have a bandwidth control, otherwise this will not work. Sets
      * the transfer rate of the file if it has not been set. This implementation

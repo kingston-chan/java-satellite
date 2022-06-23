@@ -381,7 +381,7 @@ public class FileTransferTests {
                 assertDoesNotThrow(() -> controller.sendFile("largefile2", "DeviceB", "Satellite1"));
                 assertDoesNotThrow(() -> controller.sendFile("testfile2", "DeviceB", "Satellite1"));
 
-                controller.simulate(60);
+                controller.simulate(70);
 
                 assertTrue(controller.getInfo("Satellite1").getFiles().get("largefile2").hasTransferCompleted());
                 assertTrue(controller.getInfo("Satellite1").getFiles().get("testfile2").hasTransferCompleted());

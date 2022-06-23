@@ -76,7 +76,7 @@ public class FileStorage {
      * @param file to add to storage
      */
     public void addFile(FileInfo file) {
-        this.bytesUsed += file.getFileDataSize();
+        this.bytesUsed += file.getFileSize();
         this.files.put(file.getFileName(), file);
     }
 

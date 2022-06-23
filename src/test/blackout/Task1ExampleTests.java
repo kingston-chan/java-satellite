@@ -66,6 +66,9 @@ public class Task1ExampleTests {
         controller.removeDevice("DeviceB");
         controller.removeDevice("DeviceC");
         controller.removeSatellite("Satellite1");
+
+        assertListAreEqualIgnoringOrder(Arrays.asList(), controller.listSatelliteIds());
+        assertListAreEqualIgnoringOrder(Arrays.asList(), controller.listDeviceIds());
     }
 
     @Test

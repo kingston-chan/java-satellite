@@ -224,7 +224,9 @@ public class BlackoutController {
         }
 
         if (recieverBandwidthControl != null && !recieverBandwidthControl.initiateDownload()) {
-            senderBandwidthControl.endUpload();
+            if (senderBandwidthControl != null) {
+                senderBandwidthControl.endUpload();
+            }
             throw new VirtualFileNoBandwidthException(toId);
         }
 

@@ -199,9 +199,7 @@ public class BlackoutHelpers {
             transferRate = senderBC.getMaxTransferRate(receiverBC);
         }
 
-        fileInTransfer.startTransfer(transferRate);
-
-        if (fileInTransfer.isCompleted()) {
+        if (fileInTransfer.startTransfer(transferRate)) {
             finishUploadDownload(senderBC, receiverBC);
             return true;
         }

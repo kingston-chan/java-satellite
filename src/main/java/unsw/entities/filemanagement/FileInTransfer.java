@@ -83,8 +83,10 @@ public class FileInTransfer {
     /**
      * Transfer the original file's content to the transfer file
      * according to the transfer rate.
+     * 
+     * @return whether the transfer has been completed.
      */
-    public void startTransfer(int transferRate) {
+    public boolean startTransfer(int transferRate) {
         String originalFileData = this.originalFile.getFileData();
 
         int maxDataSizeForTransfer = Math.min(
@@ -97,6 +99,9 @@ public class FileInTransfer {
 
         if (isCompleted()) {
             this.transferFile.completeTransfer();
+            return true;
         }
+
+        return false;
     }
 }

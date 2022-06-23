@@ -106,18 +106,19 @@ public class BlackoutController {
             } else if (sender.canTeleport() && sender.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
                 // Sender is downloading file and it teleported, so the transfer file is
                 // instantly downloaded, but "t" bytes are removed from transfer file.
-                BlackoutHelpers.removeTBytes(transferFile, originalFile.getFileData());
+                BlackoutHelpers.removeTBytes(transferFile, originalFile.getFileData(), transferFile.getFileDataSize());
 
                 BlackoutHelpers.finishUploadDownload(senderBandwidthControl, senderBandwidthControl);
             } else if (reciever.canTeleport() && reciever.getPosition().compareTo(Angle.fromDegrees(0)) == 0) {
                 // Reciever teleported
                 if (sender.doesOrbit()) {
                     // Sender is satellite so it does the same thing as if it was the reciever
-                    BlackoutHelpers.removeTBytes(transferFile, originalFile.getFileData());
+                    BlackoutHelpers.removeTBytes(transferFile, originalFile.getFileData(),
+                            transferFile.getFileDataSize());
                 } else {
                     // Device is the sender so its file gets all its "t" bytes removed and the
                     // reciever cancels its download.
-                    BlackoutHelpers.removeTBytes(originalFile, originalFile.getFileData());
+                    BlackoutHelpers.removeTBytes(originalFile, originalFile.getFileData(), 0);
                     senderFileStorage.removeFile(transferFile.getFileName());
                 }
 

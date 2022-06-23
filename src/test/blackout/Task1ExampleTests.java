@@ -37,11 +37,15 @@ public class Task1ExampleTests {
         assertListAreEqualIgnoringOrder(Arrays.asList("Satellite1"), controller.listSatelliteIds());
         assertListAreEqualIgnoringOrder(Arrays.asList("DeviceA", "DeviceB", "DeviceC"), controller.listDeviceIds());
 
-        assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(340), 100 + RADIUS_OF_JUPITER, "StandardSatellite"), controller.getInfo("Satellite1"));
+        assertEquals(new EntityInfoResponse("Satellite1", Angle.fromDegrees(340), 100 + RADIUS_OF_JUPITER,
+                "StandardSatellite"), controller.getInfo("Satellite1"));
 
-        assertEquals(new EntityInfoResponse("DeviceA", Angle.fromDegrees(30), RADIUS_OF_JUPITER, "HandheldDevice"), controller.getInfo("DeviceA"));
-        assertEquals(new EntityInfoResponse("DeviceB", Angle.fromDegrees(180), RADIUS_OF_JUPITER, "LaptopDevice"), controller.getInfo("DeviceB"));
-        assertEquals(new EntityInfoResponse("DeviceC", Angle.fromDegrees(330), RADIUS_OF_JUPITER, "DesktopDevice"), controller.getInfo("DeviceC"));
+        assertEquals(new EntityInfoResponse("DeviceA", Angle.fromDegrees(30), RADIUS_OF_JUPITER, "HandheldDevice"),
+                controller.getInfo("DeviceA"));
+        assertEquals(new EntityInfoResponse("DeviceB", Angle.fromDegrees(180), RADIUS_OF_JUPITER, "LaptopDevice"),
+                controller.getInfo("DeviceB"));
+        assertEquals(new EntityInfoResponse("DeviceC", Angle.fromDegrees(330), RADIUS_OF_JUPITER, "DesktopDevice"),
+                controller.getInfo("DeviceC"));
     }
 
     @Test
@@ -72,11 +76,16 @@ public class Task1ExampleTests {
         // Creates 1 device and add some files to it
         controller.createDevice("DeviceC", "DesktopDevice", Angle.fromDegrees(330));
         assertListAreEqualIgnoringOrder(Arrays.asList("DeviceC"), controller.listDeviceIds());
-        assertEquals(new EntityInfoResponse("DeviceC", Angle.fromDegrees(330), RADIUS_OF_JUPITER, "DesktopDevice"), controller.getInfo("DeviceC"));
+        assertEquals(new EntityInfoResponse("DeviceC", Angle.fromDegrees(330), RADIUS_OF_JUPITER, "DesktopDevice"),
+                controller.getInfo("DeviceC"));
 
         controller.addFileToDevice("DeviceC", "Hello World", "My first file!");
         Map<String, FileInfoResponse> expected = new HashMap<>();
-        expected.put("Hello World", new FileInfoResponse("Hello World", "My first file!", "My first file!".length(), true));
-        assertEquals(new EntityInfoResponse("DeviceC", Angle.fromDegrees(330), RADIUS_OF_JUPITER, "DesktopDevice", expected), controller.getInfo("DeviceC"));
+        expected.put("Hello World",
+                new FileInfoResponse("Hello World", "My first file!", "My first file!".length(), true));
+        assertEquals(
+                new EntityInfoResponse("DeviceC", Angle.fromDegrees(330), RADIUS_OF_JUPITER, "DesktopDevice", expected),
+                controller.getInfo("DeviceC"));
     }
+
 }

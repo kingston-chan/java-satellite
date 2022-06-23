@@ -36,7 +36,7 @@ public class MoveWithRelay implements MoveBehavior {
      */
     private void setDirectionFastestToRegion(Angle position) {
         if (position.compareTo(Angle.fromDegrees(345)) <= 0 &&
-                position.compareTo(Angle.fromDegrees(190)) > 1) {
+                position.compareTo(Angle.fromDegrees(190)) > 0) {
             this.direction = MathsHelper.CLOCKWISE;
         } else {
             this.direction = MathsHelper.ANTI_CLOCKWISE;

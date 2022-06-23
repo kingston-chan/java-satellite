@@ -25,7 +25,10 @@ public class BandwidthControl {
      * @return download bandwidth of the owner of this bandwidth control
      */
     public int getDownloadBandwidth() {
-        return this.maxDownloadBandwidth / Math.min(1, numDownloads);
+        if (numDownloads == 0) {
+            return this.maxDownloadBandwidth / 1;
+        }
+        return this.maxDownloadBandwidth / this.numDownloads;
     }
 
     /**
@@ -34,7 +37,10 @@ public class BandwidthControl {
      * @return upload bandwidth of the owner of this bandwidth control
      */
     public int getUploadBandwidth() {
-        return this.maxUploadBandwidth / Math.min(1, numUploads);
+        if (numUploads == 0) {
+            return this.maxUploadBandwidth / 1;
+        }
+        return this.maxUploadBandwidth / this.numUploads;
     }
 
     /**

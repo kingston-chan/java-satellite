@@ -166,12 +166,16 @@ public class BlackoutHelpers {
     }
 
     /**
-     * Remove "t" bytes from given file
+     * Remove "t" bytes from given file starting from given starting index
      * 
-     * @param file
+     * @param file         file to remove "t" bytes from
+     * @param originalData original data that was being uploaded/downloaded
+     * @param startIndex   index at which to start removing "t" bytes
      */
-    public static void removeTBytes(FileInfo file, String originalData) {
-        file.setFileData(originalData.replaceAll("t", ""));
+    public static void removeTBytes(FileInfo file, String originalData, int startIndex) {
+
+        file.setFileData(
+                originalData.substring(0, startIndex) + originalData.substring(startIndex).replaceAll("t", ""));
         file.updateFileSize();
         file.completeTransfer();
     }

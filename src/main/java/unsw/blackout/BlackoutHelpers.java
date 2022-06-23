@@ -173,7 +173,6 @@ public class BlackoutHelpers {
      * @param startIndex   index at which to start removing "t" bytes
      */
     public static void removeTBytes(FileInfo file, String originalData, int startIndex) {
-
         file.setFileData(
                 originalData.substring(0, startIndex) + originalData.substring(startIndex).replaceAll("t", ""));
         file.updateFileSize();
@@ -182,7 +181,10 @@ public class BlackoutHelpers {
 
     /**
      * Does the file transfer for the given file in transfer. Either the sender or
-     * reciever must have a bandwidth control, otherwise this will not work.
+     * reciever must have a bandwidth control, otherwise this will not work. Sets
+     * the transfer rate of the file if it has not been set. This implementation
+     * assumes that the transfer rate will remain the same for the whole duration of
+     * the file transfer.
      * 
      * @param senderBC       sender's bandwidth control, if sender does not have one
      *                       it is null
@@ -193,17 +195,17 @@ public class BlackoutHelpers {
      */
     public static boolean doFileTransfer(BandwidthControl senderBC, BandwidthControl receiverBC,
             FileInTransfer fileInTransfer) {
-        int transferRate;
-
-        if (senderBC == null) {
-            transferRate = receiverBC.getDownloadBandwidth();
-        } else if (receiverBC == null) {
-            transferRate = senderBC.getUploadBandwidth();
-        } else {
-            transferRate = senderBC.getMaxTransferRate(receiverBC);
+        if (fileInTransfer.getTransferRate() == 0) {
+            if (senderBC == null) {
+                fileInTransfer.setTransferRate(receiverBC.getDownloadBandwidth());
+            } else if (receiverBC == null) {
+                fileInTransfer.setTransferRate(senderBC.getUploadBandwidth());
+            } else {
+                fileInTransfer.setTransferRate(senderBC.getMaxTransferRate(receiverBC));
+            }
         }
 
-        if (fileInTransfer.startTransfer(transferRate)) {
+        if (fileInTransfer.startTransfer()) {
             finishUploadDownload(senderBC, receiverBC);
             return true;
         }

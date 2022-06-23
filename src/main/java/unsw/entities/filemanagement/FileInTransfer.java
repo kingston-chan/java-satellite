@@ -18,6 +18,7 @@ public class FileInTransfer {
     private BlackoutObject recieverId;
     private FileInfo originalFile;
     private FileInfo transferFile;
+    private int transferRate = 0;
 
     /**
      * Creates a new file in transfer
@@ -80,17 +81,25 @@ public class FileInTransfer {
         return this.transferFile;
     }
 
+    public int getTransferRate() {
+        return this.transferRate;
+    }
+
+    public void setTransferRate(int transferRate) {
+        this.transferRate = transferRate;
+    }
+
     /**
      * Transfer the original file's content to the transfer file
      * according to the transfer rate.
      * 
      * @return whether the transfer has been completed.
      */
-    public boolean startTransfer(int transferRate) {
+    public boolean startTransfer() {
         String originalFileData = this.originalFile.getFileData();
 
         int maxDataSizeForTransfer = Math.min(
-                this.transferFile.getFileData().length() + transferRate,
+                this.transferFile.getFileData().length() + this.transferRate,
                 this.originalFile.getFileDataSize());
 
         String newTransferedString = originalFileData.substring(0, maxDataSizeForTransfer);

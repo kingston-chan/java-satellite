@@ -89,6 +89,10 @@ public abstract class BlackoutObject {
         this.height = height;
     }
 
+    public void addToHeight(double changeInHeight) {
+        this.height += changeInHeight;
+    }
+
     /**
      * Sets the linear speed (km/min) of blackout object
      * 

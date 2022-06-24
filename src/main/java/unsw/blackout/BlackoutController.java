@@ -6,6 +6,7 @@ import unsw.response.models.FileInfoResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import unsw.blackout.FileTransferException.VirtualFileAlreadyExistsException;
 import unsw.blackout.FileTransferException.VirtualFileNoBandwidthException;
@@ -20,6 +21,7 @@ import unsw.entities.filemanagement.FileInTransfer;
 import unsw.entities.filemanagement.FileInfo;
 import unsw.entities.filemanagement.FileStorage;
 import unsw.entities.other.BandwidthControl;
+import unsw.entities.other.Slope;
 
 /**
  * BlackoutController helps stores and get devices and satellites.
@@ -31,6 +33,7 @@ public class BlackoutController {
 
     private HashMap<String, BlackoutObject> blackoutObjects = new HashMap<String, BlackoutObject>();
     private List<FileInTransfer> filesInTransfer = new ArrayList<FileInTransfer>();
+    private List<Slope> slopes = new ArrayList<Slope>();
 
     public void createDevice(String deviceId, String type, Angle position) {
         DeviceFactory deviceFactory = new DeviceFactory();
@@ -80,8 +83,29 @@ public class BlackoutController {
      * file transfer.
      */
     public void simulate() {
+        List<Slope> increasingSlopes = this.slopes.stream().filter(Slope::isSlopeIncreasing)
+                .collect(Collectors.toList());
+
         for (BlackoutObject blackoutObject : this.blackoutObjects.values()) {
+            Angle oldPosition = blackoutObject.getPosition();
+
             blackoutObject.doMove();
+
+            for (Slope slope : increasingSlopes) {
+                // is device on slope
+                if (slope.isDeviceOnSlope(blackoutObject)) {
+                    slope.moveDeviceOnSlope(blackoutObject);
+                } else {
+                    // is it a moving device, is the old position not in the slope,
+                    // is the new position in the slope, if all true add to slope and move
+                    // device height
+                    if (slope.hasDeviceEnteredSlope(blackoutObject, oldPosition)) {
+                        slope.addDeviceToSlope(blackoutObject);
+                        slope.moveDeviceOnSlope(blackoutObject);
+                    }
+                }
+
+            }
         }
 
         List<FileInTransfer> stillActiveFITs = new ArrayList<FileInTransfer>();
@@ -245,8 +269,7 @@ public class BlackoutController {
     }
 
     public void createSlope(int startAngle, int endAngle, int gradient) {
-        // TODO: Task 3
-        // If you are not completing Task 3 you can leave this method blank :)
+        this.slopes.add(new Slope(startAngle, endAngle, gradient));
     }
 
 }

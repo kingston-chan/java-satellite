@@ -9,18 +9,18 @@ package unsw.entities.other;
 public class BandwidthControl {
     private int maxUploadBandwidth; // If set to -1, unlimited bandwidth
     private int maxDownloadBandwidth; // If set to -1, unlimited bandwidth
-    private int numUploadsBeforeTransfer;
-    private int numDownloadsBeforeTransfer;
-    private int numUploadsAfterTransfer;
-    private int numDownloadsAfterTransfer;
+    private int numUploads;
+    private int numDownloads;
+    private int finishedUploads;
+    private int finishedDownloads;
 
     public BandwidthControl(int maxUploadBandwidth, int maxDownloadBandwidth) {
         this.maxUploadBandwidth = maxUploadBandwidth;
         this.maxDownloadBandwidth = maxDownloadBandwidth;
-        this.numUploadsBeforeTransfer = 0;
-        this.numDownloadsBeforeTransfer = 0;
-        this.numUploadsAfterTransfer = 0;
-        this.numDownloadsAfterTransfer = 0;
+        this.numUploads = 0;
+        this.numDownloads = 0;
+        this.finishedUploads = 0;
+        this.finishedDownloads = 0;
     }
 
     /**
@@ -29,10 +29,10 @@ public class BandwidthControl {
      * @return download bandwidth of the owner of this bandwidth control
      */
     public int getDownloadBandwidth() {
-        if (numDownloadsBeforeTransfer == 0) {
+        if (numDownloads == 0) {
             return this.maxDownloadBandwidth / 1;
         }
-        return this.maxDownloadBandwidth / this.numDownloadsBeforeTransfer;
+        return this.maxDownloadBandwidth / this.numDownloads;
     }
 
     /**
@@ -41,10 +41,10 @@ public class BandwidthControl {
      * @return upload bandwidth of the owner of this bandwidth control
      */
     public int getUploadBandwidth() {
-        if (numUploadsBeforeTransfer == 0) {
+        if (numUploads == 0) {
             return this.maxUploadBandwidth / 1;
         }
-        return this.maxUploadBandwidth / this.numUploadsBeforeTransfer;
+        return this.maxUploadBandwidth / this.numUploads;
     }
 
     /**
@@ -72,9 +72,8 @@ public class BandwidthControl {
      * @return whether it can initiate a download
      */
     public boolean initiateDownload() {
-        if (this.numDownloadsBeforeTransfer + 1 <= maxDownloadBandwidth || maxDownloadBandwidth == -1) {
-            this.numDownloadsBeforeTransfer++;
-            this.numDownloadsAfterTransfer++;
+        if (this.numDownloads + 1 <= maxDownloadBandwidth || maxDownloadBandwidth == -1) {
+            this.numDownloads++;
             return true;
         }
         return false;
@@ -87,24 +86,32 @@ public class BandwidthControl {
      * @return whether it can initiate an upload
      */
     public boolean initiateUpload() {
-        if (this.numUploadsBeforeTransfer + 1 <= maxUploadBandwidth || maxDownloadBandwidth == -1) {
-            this.numUploadsBeforeTransfer++;
-            this.numUploadsAfterTransfer++;
+        if (this.numUploads + 1 <= maxUploadBandwidth || maxDownloadBandwidth == -1) {
+            this.numUploads++;
             return true;
         }
         return false;
     }
 
     public void endDownload() {
-        numDownloadsAfterTransfer--;
+        finishedDownloads++;
     }
 
     public void endUpload() {
-        numUploadsAfterTransfer--;
+        finishedUploads++;
     }
 
+    /**
+     * Included two variables to keep track of number of downloads/uploads
+     * after a file transfer. This is to keep the bandwidth consistent
+     * during file transfers. If it goes negative then whatever calling
+     * it has made any error in ending upload/download. Also, this should
+     * always be called after doing the file transfers.
+     */
     public void correctUploadDownloadValues() {
-        this.numDownloadsBeforeTransfer = this.numDownloadsAfterTransfer;
-        this.numUploadsBeforeTransfer = this.numUploadsAfterTransfer;
+        this.numDownloads -= this.finishedDownloads;
+        this.numUploads -= this.finishedUploads;
+        this.finishedDownloads = 0;
+        this.finishedUploads = 0;
     }
 }

@@ -156,8 +156,9 @@ public class BlackoutController {
 
         // Update download and upload values
         for (BlackoutObject blackoutObject : this.blackoutObjects.values()) {
-            if (blackoutObject.getBandwidthControl() != null) {
-                blackoutObject.getBandwidthControl().correctUploadDownloadValues();
+            BandwidthControl bc = blackoutObject.getBandwidthControl();
+            if (bc != null) {
+                bc.correctUploadDownloadValues();
             }
         }
     }

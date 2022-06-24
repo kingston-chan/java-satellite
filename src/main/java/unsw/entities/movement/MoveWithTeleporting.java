@@ -47,13 +47,14 @@ public class MoveWithTeleporting implements MoveBehavior {
 
     @Override
     public Angle move(Angle position, double angularVelocity) {
-        Angle newPosition = MovingHelpers.moveUsingDirection(direction, position, angularVelocity);
         // check if teleported before and check if in greater than 180 to 360 region
         // if this is not checked then below will teleport satellite if it was initiated
         // in this region
-        if (hasPassed360(newPosition)) {
+        if (hasPassed360(position)) {
             passed360 = true;
         }
+
+        Angle newPosition = MovingHelpers.moveUsingDirection(direction, position, angularVelocity);
 
         if (startsGreaterThan180(newPosition)) {
             return newPosition;

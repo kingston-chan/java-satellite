@@ -10,13 +10,13 @@ import unsw.utils.MathsHelper;
  * Class to create new slopes
  */
 public class Slope {
-    private double startAngle;
-    private double endAngle;
+    private int startAngle;
+    private int endAngle;
     private int gradient;
 
     private HashMap<String, BlackoutObject> movingDevicesOnSlope = new HashMap<>();
 
-    public Slope(double startAngle, double endAngle, int gradient) {
+    public Slope(int startAngle, int endAngle, int gradient) {
         this.startAngle = startAngle;
         this.endAngle = endAngle;
         this.gradient = gradient;

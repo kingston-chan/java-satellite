@@ -153,6 +153,13 @@ public class BlackoutController {
         }
 
         filesInTransfer = stillActiveFITs;
+
+        // Update download and upload values
+        for (BlackoutObject blackoutObject : this.blackoutObjects.values()) {
+            if (blackoutObject.getBandwidthControl() != null) {
+                blackoutObject.getBandwidthControl().correctUploadDownloadValues();
+            }
+        }
     }
 
     /**

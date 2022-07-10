@@ -1,0 +1,124 @@
+Final Result = 44.5/50.0
+Test 1-1: Test creating different types of devices
+SUCCESS DONE
+
+Test 1-2: Test removing different types of devices
+SUCCESS DONE
+
+Test 1-3: Test creating different types of satellites
+SUCCESS DONE
+
+Test 1-4: Test removing different types of satellites
+SUCCESS DONE
+
+Test 1-5: Test adding a file to a device
+SUCCESS DONE
+
+Test 1-6: Testing retrieving device information
+SUCCESS DONE
+
+Test 1-7: Testing retrieving satellite information
+SUCCESS DONE
+
+Test 2-1: Test simulation with a standard satellite
+SUCCESS DONE
+
+Test 2-3: Test wrapping behaviour around 360 and 0 degrees with standard satellite
+SUCCESS DONE
+
+Test 2-4: Test wrapping behaviour around 360 and 0 degrees with teleporting satellite
+SUCCESS DONE
+
+Test 2-5: Test movement of relay satellites
+SUCCESS DONE
+
+Test 2-6: Test relay satellites choose the shortest path to get into the [140-190] region
+Task2MarkingTests > Test relay satellites choose the shortest path to get into the [140-190] region FAILED org.opentest4j.AssertionFailedError: expected: <true> but was: <false> at app//org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:55) at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:40) at app//org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:35) at app//org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:179) at app//blackout.TestHelpers.assertEqualsMargin(TestHelpers.java:23) at app//blackout.Task2MarkingTests.hardRelayCase(Task2MarkingTests.java:163) FAILURE DONE 1 test completed, 1 failed FAILURE: Build failed with an exception. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src What went wrong: Execution failed for task ':test'. > There were failing tests. See the report at: /5362176/build/reports/tests/test/index.html README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Try: > Run with --stacktrace option to get the stack trace. > Run with --info or --debug option to get more log output. > Run with --scan to get full insights. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Get more help at https://help.gradle.org BUILD FAILED in 4s
+
+Test 2-7: Test communicable entities in range for different types of devices and satellites
+SUCCESS DONE
+
+Test 2-8: Testing a file can be created and sent
+SUCCESS DONE
+
+Test 2-9: Testing simple file transfer from device to satellite
+SUCCESS DONE
+
+Test 2-10: Testing simple file transfer from satellite to device
+SUCCESS DONE
+
+Test 2-11: Test multiple files transferring simultaneously
+SUCCESS DONE
+
+Test 2-12: Test teleporting satellite transmitting to devices - splitting bandwidth
+SUCCESS DONE
+
+Test 2-13: Test teleporting satellite transmitting to standard - bandwidth bottlenecked on standard
+SUCCESS DONE
+
+Test 2-14: Test teleporting satellite movement and teleportation behaviour
+SUCCESS DONE
+
+Test 2-15: Testing a device sending a file to a teleporting satellite which teleports mid-transfer
+SUCCESS DONE
+
+Test 2-16: Testing a teleport mid-transfer with a satellite sending a file to a device + satellite
+SUCCESS DONE
+
+Test 2-17: Test file-sending behaviour of a teleporting satellite after teleportation is as normal
+SUCCESS DONE
+
+Test 2-18: Test entities in range with relay satellites - no movement
+SUCCESS DONE
+
+Test 2-19: Test a simple case with recursive relay satellites
+SUCCESS DONE
+
+Test 2-20: Test a successful relay file transfer
+SUCCESS DONE
+
+Test 2-21: Test sending a file from device to a satellite - satellite moves out of range
+SUCCESS DONE
+
+Test 2-22: Test sending a file from a satellite to a device - satellite moves out of range
+SUCCESS DONE
+
+Test 2-23: Test file not found exception
+SUCCESS DONE
+
+Test 2-24: Test file already exists exception
+SUCCESS DONE
+
+Test 2-25: Test no bandwidth exception
+SUCCESS DONE
+
+Test 2-26: Test max out storage space on satellite
+SUCCESS DONE
+
+Test 3-1: Testing a moving device moving in a circle
+SUCCESS DONE
+
+Test 3-2: Testing moving devices can still send or receive files
+SUCCESS DONE
+
+Test 3-3: Test creating different types of moving devices
+SUCCESS DONE
+
+Test 3-4: Testing moving device behaviour on one slope and back to default slope
+Task3MarkingTests > Testing moving device behaviour on one slope and back to default slope FAILED org.opentest4j.AssertionFailedError: expected: <21.980415192758084> but was: <20.0> at app//org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:55) at app//org.junit.jupiter.api.AssertionUtils.failNotEqual(AssertionUtils.java:62) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:86) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:81) at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1010) at app//blackout.Task3MarkingTests.testMovingDeviceOnOneSlope(Task3MarkingTests.java:116) FAILURE DONE 1 test completed, 1 failed FAILURE: Build failed with an exception. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src What went wrong: Execution failed for task ':test'. > There were failing tests. See the report at: /5362176/build/reports/tests/test/index.html README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Try: > Run with --stacktrace option to get the stack trace. > Run with --info or --debug option to get more log output. > Run with --scan to get full insights. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Get more help at https://help.gradle.org BUILD FAILED in 4s
+
+Test 3-5: Test moving device behaviour on multiple slopes - example from the spec
+Task3MarkingTests > Test moving device behaviour on multiple slopes - example from the spec FAILED org.opentest4j.AssertionFailedError: expected: <10.490280181480022> but was: <10.0> at app//org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:55) at app//org.junit.jupiter.api.AssertionUtils.failNotEqual(AssertionUtils.java:62) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:86) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:81) at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1010) at app//blackout.Task3MarkingTests.testMovingDeviceOnMultipleSlopes(Task3MarkingTests.java:136) FAILURE DONE 1 test completed, 1 failed FAILURE: Build failed with an exception. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src What went wrong: Execution failed for task ':test'. > There were failing tests. See the report at: /5362176/build/reports/tests/test/index.html README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Try: > Run with --stacktrace option to get the stack trace. > Run with --info or --debug option to get more log output. > Run with --scan to get full insights. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Get more help at https://help.gradle.org BUILD FAILED in 5s
+
+Test 3-6: Test moving devices have consistent behaviour on slopes after circumnavigating the planet
+Task3MarkingTests > Test moving devices have consistent behaviour on slopes after circumnavigating the planet FAILED org.opentest4j.AssertionFailedError: expected: <10.490280181480022> but was: <10.0> at app//org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:55) at app//org.junit.jupiter.api.AssertionUtils.failNotEqual(AssertionUtils.java:62) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:86) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:81) at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1010) at app//blackout.Task3MarkingTests.testMovingDeviceAroundTheWorld(Task3MarkingTests.java:162) FAILURE DONE 1 test completed, 1 failed FAILURE: Build failed with an exception. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src What went wrong: Execution failed for task ':test'. > There were failing tests. See the report at: /5362176/build/reports/tests/test/index.html README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Try: > Run with --stacktrace option to get the stack trace. > Run with --info or --debug option to get more log output. > Run with --scan to get full insights. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Get more help at https://help.gradle.org BUILD FAILED in 4s
+
+Test 3-7: Test moving devices on multiple slopes with jumping on slopes
+Task3MarkingTests > Test moving devices on multiple slopes with jumping on slopes FAILED org.opentest4j.AssertionFailedError: expected: <5.130402651255081> but was: <5.0> at app//org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:55) at app//org.junit.jupiter.api.AssertionUtils.failNotEqual(AssertionUtils.java:62) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:86) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:81) at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1010) at app//blackout.Task3MarkingTests.testMovingDeviceMultipleSlopes(Task3MarkingTests.java:188) FAILURE DONE 1 test completed, 1 failed FAILURE: Build failed with an exception. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src What went wrong: Execution failed for task ':test'. > There were failing tests. See the report at: /5362176/build/reports/tests/test/index.html README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Try: > Run with --stacktrace option to get the stack trace. > Run with --info or --debug option to get more log output. > Run with --scan to get full insights. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Get more help at https://help.gradle.org BUILD FAILED in 4s
+
+Test 3-8: Test departing Jupiter with postive gradient and land on Jupiter with two negative slopes
+Task3MarkingTests > Test departing Jupiter with postive gradient and land on Jupiter with two negative slopes FAILED org.opentest4j.AssertionFailedError: expected: <15.40759901654888> but was: <14.0> at app//org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:55) at app//org.junit.jupiter.api.AssertionUtils.failNotEqual(AssertionUtils.java:62) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:86) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:81) at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1010) at app//blackout.Task3MarkingTests.testMovingDeviceDoubleNegative(Task3MarkingTests.java:224) FAILURE DONE 1 test completed, 1 failed FAILURE: Build failed with an exception. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src What went wrong: Execution failed for task ':test'. > There were failing tests. See the report at: /5362176/build/reports/tests/test/index.html README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Try: > Run with --stacktrace option to get the stack trace. > Run with --info or --debug option to get more log output. > Run with --scan to get full insights. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Get more help at https://help.gradle.org BUILD FAILED in 4s
+
+Test 3-9: Test overlapping slope drop to inner slope at the end of outer slope
+Task3MarkingTests > Test overlapping slope drop to inner slope at the end of outer slope FAILED org.opentest4j.AssertionFailedError: expected: <99.5541866587856> but was: <78.15> at app//org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:55) at app//org.junit.jupiter.api.AssertionUtils.failNotEqual(AssertionUtils.java:62) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:86) at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:81) at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1010) at app//blackout.Task3MarkingTests.testMovingDeviceTwoSlopes(Task3MarkingTests.java:251) FAILURE DONE 1 test completed, 1 failed FAILURE: Build failed with an exception. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src What went wrong: Execution failed for task ':test'. > There were failing tests. See the report at: /5362176/build/reports/tests/test/index.html README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Try: > Run with --stacktrace option to get the stack trace. > Run with --info or --debug option to get more log output. > Run with --scan to get full insights. README.md blog.md build build.gradle design.pdf gradle gradlew gradlew.bat imgs src Get more help at https://help.gradle.org BUILD FAILED in 4s
+
